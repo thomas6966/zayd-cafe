@@ -3,6 +3,9 @@ import WebApp from '@twa-dev/sdk';
 
 const inTelegram = !!WebApp.initData;
 
+// Backend manzili: Vercel'da VITE_API_URL (Render), lokalda bo'sh (Vite proxy ishlatiladi)
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+
 export const getInitData = () => (inTelegram ? WebApp.initData : 'dev'); // 'dev' — faqat development brauzer rejimi
 
 const ADMIN_PIN_KEY = 'zayd_admin_pin';
@@ -15,7 +18,7 @@ export const adminPin = {
 async function request(method, url, body) {
   let res;
   try {
-    res = await fetch(url, {
+    res = await fetch(API_BASE + url, {
       method,
       headers: {
         'Content-Type': 'application/json',
