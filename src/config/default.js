@@ -14,5 +14,9 @@ module.exports = {
   adminIds: (process.env.ADMIN_IDS || '').split(',').map((s) => s.trim()).filter(Boolean),
   adminPin: process.env.ADMIN_PIN || '',
   webAppUrl: (process.env.WEBAPP_URL || '').replace(/\/$/, ''),
+  // Render'da RENDER_EXTERNAL_URL avtomatik beriladi -> bot webhook rejimida ishlaydi
+  publicUrl: (process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/+$/, ''),
+  // Faqat shu frontend'dan keladigan so'rovlarga ruxsat (bo'sh bo'lsa hammasiga)
+  frontendUrl: (process.env.FRONTEND_URL || '').replace(/\/+$/, ''),
   cafeName: 'ZAYD Cafe',
 };

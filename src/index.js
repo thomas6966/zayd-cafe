@@ -1,4 +1,5 @@
 // Asosiy ishga tushirish fayli: Express API + Telegram bot
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const config = require('./config/default');
@@ -12,8 +13,13 @@ BigInt.prototype.toJSON = function () {
 };
 
 const app = express();
-app.use(cors());
+app.use(cors(config.frontendUrl ? { origin: config.frontendUrl } : undefined));
 app.use(express.json({ limit: '100kb' }));
+
+// Webhook (faqat server rejimida): yo'l va maxfiy kalit bot tokenidan hosil qilinadi
+const hookSecret = crypto.createHash('sha256').update(config.botToken).digest('hex').slice(0, 32);
+const hookPath = `/telegram/${hookSecret}`;
+if (config.publicUrl) app.use(bot.webhookCallback(hookPath, { secretToken: hookSecret }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api', require('./routes/client.routes'));
@@ -36,8 +42,14 @@ async function main() {
 
   registerBotRoutes();
   const me = await bot.telegram.getMe();
-  // Long polling: localhost'da webhook kerak emas
-  bot.launch({ dropPendingUpdates: true }).catch((e) => console.error('[bot]', e.message));
+  if (config.publicUrl) {
+    // Server (Render): webhook — Telegram xabari uxlab yotgan xizmatni uyg'otadi
+    await bot.telegram.setWebhook(config.publicUrl + hookPath, { secret_token: hookSecret, drop_pending_updates: true });
+    console.log("✔ Webhook o'rnatildi");
+  } else {
+    // Lokal: long polling
+    bot.launch({ dropPendingUpdates: true }).catch((e) => console.error('[bot]', e.message));
+  }
   console.log(`✔ Bot ishga tushdi: @${me.username}`);
 
   if (config.webAppUrl) {
@@ -56,7 +68,7 @@ main().catch((e) => {
 });
 
 const stop = (sig) => {
-  bot.stop(sig);
+  if (!config.publicUrl) bot.stop(sig);
   prisma.$disconnect().finally(() => process.exit(0));
 };
 process.once('SIGINT', () => stop('SIGINT'));
