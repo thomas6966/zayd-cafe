@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum OrderStatus {
+  NEW
+  PREPARING
+  READY
+  DELIVERING
+  COMPLETED
+  CANCELLED
+}
+
+enum PromoType {
+  PERCENT
+  FIXED
+}
+
+enum DeliveryType {
+  PICKUP
+  DELIVERY
+}
+
+enum PaymentMethod {
+  CASH
+  TERMINAL
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  telegramId BigInt   @unique
+  firstName  String
+  lastName   String?
+  username   String?
+  phone      String?
+  createdAt  DateTime @default(now())
+  orders     Order[]
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  emoji     String    @default("🍽️")
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String      @default("")
+  price       Int // so'mda
+  imageUrl    String?
+  isAvailable Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  categoryId  Int
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+  status        OrderStatus   @default(NEW)
+  deliveryType  DeliveryType
+  paymentMethod PaymentMethod @default(CASH)
+  phone         String
+  address       String?
+  latitude      Float?
+  longitude     Float?
+  comment       String?
+  subtotal      Int           @default(0)
+  discount      Int           @default(0)
+  deliveryFee   Int           @default(0)
+  promoCode     String?
+  total         Int
+  items         OrderItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([userId])
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name      String // snapshot
+  price     Int // snapshot
+  quantity  Int
+  note      String?
+  addons    Json? // [{id, name, price}] snapshot
+}
+
+// Pullik qo'shimchalar (sirop, qo'shimcha pishloq va h.k.)
+model Addon {
+  id          Int     @id @default(autoincrement())
+  name        String
+  nameRu      String  @default("")
+  price       Int     @default(0)
+  categoryIds Int[]
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+}
+
+model PromoCode {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  type      PromoType @default(PERCENT)
+  value     Int
+  minOrder  Int       @default(0)
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}

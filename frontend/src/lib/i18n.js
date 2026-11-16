@@ -1,0 +1,75 @@
+// Ikki tilli interfeys: O'zbek / Русский
+import { useStore } from './store.js';
+
+const D = {
+  uz: {
+    tagline: 'Yangi ta\'m · A\'lo sifat',
+    loadError: 'Yuklab bo\'lmadi. Internetni tekshiring.',
+    retry: 'Qayta urinish',
+    hello: 'Salom, {name}!',
+    sub: 'Bugun nima buyurtma qilamiz?',
+    search: 'Taom qidirish…',
+    empty: 'Hech narsa topilmadi',
+    emptySub: 'Boshqa so\'z bilan urinib ko\'ring',
+    'nav.menu': 'Menyu', 'nav.orders': 'Buyurtmalar', 'nav.profile': 'Profil',
+    'tag.fav': 'Sevimlilar',
+    from: 'dan', sum: 'so\'m',
+    'cart.view': 'Savatni ko\'rish', 'cart.title': 'Savat', 'cart.empty': 'Savat bo\'sh', 'cart.emptySub': 'Menyudan biror narsa tanlang',
+    'cart.clear': 'Tozalash', 'cart.fulfillment': 'Qanday olasiz?', 'cart.pickup': 'Olib ketish', 'cart.delivery': 'Yetkazish',
+    'cart.phone': 'Telefon raqam', 'cart.address': 'Manzil: ko\'cha, uy, mo\'ljal…', 'cart.pin': 'Lokatsiyamni yuborish',
+    'cart.pinned': 'Lokatsiya olindi', 'cart.pinFail': 'Lokatsiyani olib bo\'lmadi', 'cart.note': 'Buyurtmaga izoh (ixtiyoriy)',
+    'cart.payment': 'To\'lov turi', 'cart.cash': 'Naqd', 'cart.terminal': 'Terminal', 'cart.payHint': 'To\'lov buyurtmani olganingizda amalga oshiriladi.',
+    'cart.subtotal': 'Taomlar', 'cart.promo': 'Promo-kod', 'cart.promoPh': 'Promo-kodni kiriting', 'cart.promoApply': "Qo'llash", 'cart.promoOk': "Promo-kod qo'llandi", 'cart.discount': 'Chegirma', 'cart.deliveryFee': 'Yetkazib berish', 'cart.free': 'Bepul', 'cart.minOrder': 'Minimal buyurtma', 'cart.total': 'Jami', 'cart.noFees': 'Yashirin to\'lovlar yo\'q', 'cart.place': 'Buyurtma berish', 'cart.placing': 'Yuborilmoqda…',
+    'err.phone': 'Telefon raqamini to\'g\'ri kiriting', 'err.address': 'Manzilni yozing yoki lokatsiyani yuboring',
+    'product.add': 'Savatga', 'product.sugar': 'Shakar', 'product.extras': 'Istaklar', 'product.paid': 'Qo\'shimchalar', 'product.note': 'Izoh (ixtiyoriy)', 'product.added': 'Savatga qo\'shildi',
+    'sugar.0': 'Yo\'q', 'sugar.25': '25%', 'sugar.50': '50%', 'sugar.75': '75%', 'sugar.100': '100%',
+    'ok.title': 'Buyurtma qabul qilindi!', 'ok.number': 'Buyurtma raqami', 'ok.total': 'Jami', 'ok.track': 'Buyurtmani kuzatish', 'ok.toMenu': 'Menyuga qaytish',
+    'ok.notify': 'Holati o\'zgarganda Telegram orqali xabar beramiz',
+    'orders.title': 'Buyurtmalarim', 'orders.empty': 'Hali buyurtmalar yo\'q', 'orders.emptySub': 'Birinchi buyurtmangizni bering', 'orders.active': 'Faol', 'orders.history': 'Tarix',
+    'orders.reorder': 'Qayta buyurtma', 'orders.reordered': 'Savatga qo\'shildi', 'orders.items': '{n} ta taom',
+    'status.NEW': 'Qabul qilindi', 'status.PREPARING': 'Tayyorlanmoqda', 'status.READY': 'Tayyor', 'status.DELIVERING': 'Yo\'lda', 'status.COMPLETED': 'Yakunlandi', 'status.CANCELLED': 'Bekor qilindi',
+    'profile.title': 'Profil', 'profile.lang': 'Til', 'profile.theme': 'Kunduzgi / tungi rejim', 'profile.favs': 'Sevimli taomlar', 'profile.noFavs': 'Hali sevimlilar yo\'q — ❤️ ni bosing',
+    'profile.orders': 'Buyurtmalar', 'profile.spent': 'Sarflangan', 'profile.phone': 'Telefon',
+    'profile.halal': 'Barcha taomlarimiz halol 🌿', 'profile.contact': 'Savollar bo\'lsa — bot orqali yozing',
+  },
+  ru: {
+    tagline: 'Свежий вкус · Отличное качество',
+    loadError: 'Не удалось загрузить. Проверьте интернет.',
+    retry: 'Повторить',
+    hello: 'Привет, {name}!',
+    sub: 'Что закажем сегодня?',
+    search: 'Поиск блюд…',
+    empty: 'Ничего не найдено',
+    emptySub: 'Попробуйте другой запрос',
+    'nav.menu': 'Меню', 'nav.orders': 'Заказы', 'nav.profile': 'Профиль',
+    'tag.fav': 'Избранное',
+    from: 'от', sum: 'сум',
+    'cart.view': 'Открыть корзину', 'cart.title': 'Корзина', 'cart.empty': 'Корзина пуста', 'cart.emptySub': 'Выберите что-нибудь из меню',
+    'cart.clear': 'Очистить', 'cart.fulfillment': 'Как получите?', 'cart.pickup': 'Самовывоз', 'cart.delivery': 'Доставка',
+    'cart.phone': 'Номер телефона', 'cart.address': 'Адрес: улица, дом, ориентир…', 'cart.pin': 'Отправить геолокацию',
+    'cart.pinned': 'Геолокация получена', 'cart.pinFail': 'Не удалось получить геолокацию', 'cart.note': 'Комментарий к заказу (необязательно)',
+    'cart.payment': 'Способ оплаты', 'cart.cash': 'Наличные', 'cart.terminal': 'Терминал', 'cart.payHint': 'Оплата при получении заказа.',
+    'cart.subtotal': 'Блюда', 'cart.promo': 'Промокод', 'cart.promoPh': 'Введите промокод', 'cart.promoApply': 'Применить', 'cart.promoOk': 'Промокод применён', 'cart.discount': 'Скидка', 'cart.deliveryFee': 'Доставка', 'cart.free': 'Бесплатно', 'cart.minOrder': 'Минимальный заказ', 'cart.total': 'Итого', 'cart.noFees': 'Без скрытых платежей', 'cart.place': 'Оформить заказ', 'cart.placing': 'Отправка…',
+    'err.phone': 'Введите корректный номер телефона', 'err.address': 'Укажите адрес или отправьте геолокацию',
+    'product.add': 'В корзину', 'product.sugar': 'Сахар', 'product.extras': 'Пожелания', 'product.paid': 'Дополнения', 'product.note': 'Комментарий (необязательно)', 'product.added': 'Добавлено в корзину',
+    'sugar.0': 'Нет', 'sugar.25': '25%', 'sugar.50': '50%', 'sugar.75': '75%', 'sugar.100': '100%',
+    'ok.title': 'Заказ принят!', 'ok.number': 'Номер заказа', 'ok.total': 'Итого', 'ok.track': 'Следить за заказом', 'ok.toMenu': 'Вернуться в меню',
+    'ok.notify': 'Сообщим в Telegram, когда статус изменится',
+    'orders.title': 'Мои заказы', 'orders.empty': 'Заказов пока нет', 'orders.emptySub': 'Сделайте первый заказ', 'orders.active': 'Активные', 'orders.history': 'История',
+    'orders.reorder': 'Повторить заказ', 'orders.reordered': 'Добавлено в корзину', 'orders.items': '{n} поз.',
+    'status.NEW': 'Принят', 'status.PREPARING': 'Готовится', 'status.READY': 'Готов', 'status.DELIVERING': 'В пути', 'status.COMPLETED': 'Завершён', 'status.CANCELLED': 'Отменён',
+    'profile.title': 'Профиль', 'profile.lang': 'Язык', 'profile.theme': 'Дневной / ночной режим', 'profile.favs': 'Избранные блюда', 'profile.noFavs': 'Пока пусто — нажмите ❤️',
+    'profile.orders': 'Заказы', 'profile.spent': 'Потрачено', 'profile.phone': 'Телефон',
+    'profile.halal': 'Все наши блюда халяль 🌿', 'profile.contact': 'Есть вопросы — напишите боту',
+  },
+};
+
+export function useT() {
+  const lang = useStore((s) => s.lang);
+  const t = (key, vars) => {
+    let s = D[lang][key] ?? D.uz[key] ?? key;
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, v);
+    return s;
+  };
+  return { t, lang };
+}
