@@ -7,7 +7,7 @@ const User = require('../models/User');
 const fmt = (n) => new Intl.NumberFormat('ru-RU').format(n) + " so'm";
 const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
-const PAY_LABEL = { CASH: 'Naqd', TERMINAL: 'Terminal (olganda)', ONLINE: "Onlayn karta (to'lov kutilmoqda)" };
+const PAY_LABEL = { CASH: 'Naqd', TERMINAL: 'Terminal (olganda)', ONLINE: "Onlayn karta — to'lov tekshirilmoqda" };
 
 const STATUS_TEXT = {
   NEW: '🆕 Buyurtmangiz qabul qilindi',
@@ -49,7 +49,12 @@ async function safeSend(chatId, text, extra) {
 
 // Yangi buyurtma: mijozga tasdiq + adminlarga signal
 async function notifyNewOrder(order) {
-  await safeSend(order.user.telegramId, `${STATUS_TEXT.NEW}\n\n<b>Buyurtma #${order.id}</b>\nJami: <b>${fmt(order.total)}</b>`);
+  await safeSend(
+    order.user.telegramId,
+    `${STATUS_TEXT.NEW}\n\n<b>Buyurtma #${order.id}</b>\nJami: <b>${fmt(order.total)}</b>${
+      order.paymentMethod === 'ONLINE' ? "\n\n⏳ To'lovingiz tekshirilmoqda. Tasdiqlangach buyurtma tayyorlanadi." : ''
+    }`
+  );
 
   const lines = order.items
     .map((i) => `• ${esc(i.name)} × ${i.quantity}${i.addons?.length ? ` + ${esc(i.addons.map((a) => a.name).join(', '))}` : ''}${i.note ? ` <i>(${esc(i.note)})</i>` : ''}`)
@@ -61,7 +66,9 @@ async function notifyNewOrder(order) {
     PAY_LABEL[order.paymentMethod]
   }\n\n${lines}${order.discount > 0 ? `\n🏷 Promo ${esc(order.promoCode)}: −${fmt(order.discount)}` : ''}${
     order.deliveryFee > 0 ? `\n🚚 Yetkazish: ${fmt(order.deliveryFee)}` : ''
-  }\n\n💰 <b>${fmt(order.total)}</b>${order.comment ? `\n💬 ${esc(order.comment)}` : ''}`;
+  }\n\n💰 <b>${fmt(order.total)}</b>${order.comment ? `\n💬 ${esc(order.comment)}` : ''}${
+    order.paymentMethod === 'ONLINE' ? "\n\n⚠️ Payme/Click'da pul tushganini tekshirib, admin panelda to'lovni tasdiqlang." : ''
+  }`;
 
   for (const id of config.adminIds) {
     await safeSend(id, text);

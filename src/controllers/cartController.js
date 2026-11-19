@@ -2,7 +2,7 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
-const { notifyNewOrder, notifyPaymentPending } = require('./botController');
+const { notifyNewOrder } = require('./botController');
 
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -129,7 +129,7 @@ const createOrder = asyncH(async (req, res) => {
   });
   if (q.promo) Order.usePromo(q.promo.code).catch((e) => console.error('[promo]', e.message));
 
-  notifyNewOrder(order).catch((e) => console.error('[notify]', e.message));
+  // Onlayn buyurtma to'lovdan keyin qabul qilinadi: admin va mijozga xabar "To'ladim" bosilganda ketadi
   res.status(201).json(order);
 });
 
@@ -141,10 +141,20 @@ const markPaid = asyncH(async (req, res) => {
   if (order.status === 'CANCELLED') return res.status(400).json({ error: 'Buyurtma bekor qilingan' });
   if (order.paymentStatus === 'UNPAID') {
     const updated = await Order.setPayment(order.id, 'PENDING');
-    notifyPaymentPending(updated).catch((e) => console.error('[notify]', e.message));
+    notifyNewOrder(updated).catch((e) => console.error('[notify]', e.message));
     return res.json(updated);
   }
   res.json(order);
+});
+
+// Mijoz to'lanmagan buyurtmani bekor qiladi
+const cancelUnpaid = asyncH(async (req, res) => {
+  const order = await Order.findById(Number(req.params.id));
+  if (!order || order.userId !== req.user.id) return res.status(404).json({ error: 'Buyurtma topilmadi' });
+  if (order.paymentMethod !== 'ONLINE' || order.paymentStatus !== 'UNPAID' || order.status !== 'NEW') {
+    return res.status(400).json({ error: "Bu buyurtmani bekor qilib bo'lmaydi" });
+  }
+  res.json(await Order.updateStatus(order.id, 'CANCELLED'));
 });
 
 const myOrders = asyncH(async (req, res) => {
@@ -157,4 +167,4 @@ const getOrder = asyncH(async (req, res) => {
   res.json(order);
 });
 
-module.exports = { getMenu, getConfig, quote, createOrder, markPaid, myOrders, getOrder };
+module.exports = { getMenu, getConfig, quote, createOrder, markPaid, cancelUnpaid, myOrders, getOrder };

@@ -23,7 +23,7 @@ export default function OrderSuccess() {
             <motion.path d="M38 64l17 17 32-36" fill="none" stroke="#8fc79a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.45, duration: 0.5 }} />
           </motion.svg>
 
-          <motion.h1 className="mt-7 font-display text-[30px] font-bold" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>{t('ok.title')}</motion.h1>
+          <motion.h1 className="mt-7 font-display text-[30px] font-bold" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>{order.paymentMethod === 'ONLINE' && order.paymentStatus === 'UNPAID' ? t('ok.payTitle') : t('ok.title')}</motion.h1>
 
           <motion.div className="mt-6 w-full max-w-sm rounded-3xl border border-line bg-surface p-5" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}>
             <p className="text-[12px] font-bold uppercase tracking-widest text-muted">{t('ok.number')}</p>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { api } from '../lib/api.js';
 import { useT } from '../lib/i18n.js';
 import { haptic } from '../lib/tg.js';
 import { money, timeStr } from '../lib/format.js';
@@ -79,6 +80,11 @@ export default function OrdersTab() {
   const active = orders.filter((o) => ACTIVE.includes(o.status));
   const history = orders.filter((o) => !ACTIVE.includes(o.status));
 
+  const cancelUnpaid = async (o) => {
+    if (!confirm(t('orders.cancelAsk'))) return;
+    try { await api.post(`/api/orders/${o.id}/cancel`); haptic.success(); refreshOrders(); } catch (e) { showToast(e.message); }
+  };
+
   const reorder = (o) => {
     haptic.success();
     let added = 0;
@@ -109,16 +115,19 @@ export default function OrdersTab() {
                     <p className="text-[18px] font-extrabold">{o.deliveryType === 'DELIVERY' ? '🛵' : '🛍️'} #{o.id}</p>
                     <p className="text-[12px] text-muted">{timeStr(o.createdAt, locale)}</p>
                   </div>
-                  <span className="rounded-full bg-accent/15 px-3 py-1 text-[12px] font-bold text-accent">{t(`status.${o.status}`)}</span>
+                  <span className="rounded-full bg-accent/15 px-3 py-1 text-[12px] font-bold text-accent">{o.paymentMethod === 'ONLINE' && o.paymentStatus === 'UNPAID' ? t('pay.waiting') : t(`status.${o.status}`)}</span>
                 </div>
-                <Tracker order={o} />
+                {!(o.paymentMethod === 'ONLINE' && o.paymentStatus === 'UNPAID') && <Tracker order={o} />}
                 <Lines order={o} products={products} />
                 <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
                   <p className="text-[16px] font-extrabold text-gold">{money(o.total)} {t('sum')}</p>
                   {o.paymentMethod === 'ONLINE' ? (
                     o.paymentStatus === 'PAID' ? <p className="text-[12px] font-semibold text-ok">✅ {t('pay.confirmed')}</p>
                     : o.paymentStatus === 'PENDING' ? <p className="text-[12px] font-semibold text-accent">⏳ {t('pay.pending')}</p>
-                    : <button className="rounded-full bg-accent px-4 py-2 text-[13px] font-bold text-on-accent active:scale-95" onClick={() => setPayOrder(o)}>💳 {t('pay.now')}</button>
+                    : <div className="flex items-center gap-2">
+                        <button className="rounded-full border border-line px-3.5 py-2 text-[13px] font-semibold text-muted active:scale-95" onClick={() => cancelUnpaid(o)}>{t('orders.cancel')}</button>
+                        <button className="rounded-full bg-accent px-4 py-2 text-[13px] font-bold text-on-accent active:scale-95" onClick={() => setPayOrder(o)}>💳 {t('pay.now')}</button>
+                      </div>
                   ) : (
                     <p className="text-[12px] font-semibold text-muted">{o.paymentMethod === 'CASH' ? t('pay.cash') : t('pay.terminal')}</p>
                   )}

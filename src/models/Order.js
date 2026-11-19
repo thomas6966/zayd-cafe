@@ -7,9 +7,12 @@ const findById = (id) => prisma.order.findUnique({ where: { id }, include });
 const findByUser = (userId) =>
   prisma.order.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, take: 30, include: { items: true } });
 
+// To'lov qilinmagan onlayn buyurtmalar admin ro'yxatida ko'rinmaydi (hali qabul qilinmagan)
+const UNPAID_ONLINE = { paymentMethod: 'ONLINE', paymentStatus: 'UNPAID' };
+
 const list = (status) =>
   prisma.order.findMany({
-    where: status ? { status } : undefined,
+    where: { ...(status ? { status } : {}), NOT: UNPAID_ONLINE },
     orderBy: { createdAt: 'desc' },
     take: 200,
     include,
@@ -20,7 +23,7 @@ const updateStatus = (id, status) => prisma.order.update({ where: { id }, data: 
 
 // Status bo'yicha buyurtmalar soni (admin paneldagi badge'lar uchun)
 const countByStatus = async () => {
-  const rows = await prisma.order.groupBy({ by: ['status'], _count: { _all: true } });
+  const rows = await prisma.order.groupBy({ by: ['status'], where: { NOT: UNPAID_ONLINE }, _count: { _all: true } });
   return Object.fromEntries(rows.map((r) => [r.status, r._count._all]));
 };
 
@@ -51,7 +54,7 @@ async function getStats() {
   const [orders, customers, active] = await Promise.all([
     prisma.order.findMany({ where: { createdAt: { gte: since }, status: { not: 'CANCELLED' }, OR: PAID_OR_OFFLINE }, select: { id: true, total: true, createdAt: true } }),
     prisma.user.count(),
-    prisma.order.count({ where: { status: { in: ['NEW', 'PREPARING', 'READY', 'DELIVERING'] } } }),
+    prisma.order.count({ where: { status: { in: ['NEW', 'PREPARING', 'READY', 'DELIVERING'] }, NOT: UNPAID_ONLINE } }),
   ]);
 
   const days = [];
