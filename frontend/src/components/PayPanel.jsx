@@ -38,6 +38,13 @@ export default function PayPanel({ order, onChange }) {
     if (await copy(text)) showToast(`✓ ${label}`);
   };
 
+  // Ilovani oldindan to'ldirib ochib bo'lmaydi, shuning uchun karta raqami nusxalanadi, mijoz uni ilovada joylashtiradi
+  const openApp = async (url) => {
+    haptic.tap();
+    if (await copy(String(cardNumber).replace(/\D/g, ''))) showToast(`✓ ${t('pay.copiedOpen')}`);
+    setTimeout(() => open(url), 350);
+  };
+
   const paid = async () => {
     setBusy(true); setError('');
     try {
@@ -68,19 +75,19 @@ export default function PayPanel({ order, onChange }) {
 
         <p className="mt-4 text-[12px] font-bold uppercase tracking-widest text-muted">{t('pay.card')}</p>
         <div className="mt-1 flex items-center justify-between gap-2">
-          <p className="font-mono text-[20px] font-extrabold tracking-wider">{fmtCard(cardNumber)}</p>
+          <p className="whitespace-nowrap font-mono text-[17px] font-extrabold">{fmtCard(cardNumber)}</p>
           <button onClick={() => onCopy(String(cardNumber).replace(/\D/g, ''), t('pay.copied'))}
-            className="shrink-0 rounded-full border border-accent px-3.5 py-1.5 text-[13px] font-bold text-accent active:scale-95">📋 {t('pay.copy')}</button>
+            className="shrink-0 rounded-full border border-accent px-3 py-1.5 text-[12.5px] font-bold text-accent active:scale-95">📋 {t('pay.copy')}</button>
         </div>
         {cardHolder && <p className="mt-1 text-[13px] text-muted">{cardHolder}</p>}
         <p className="mt-3 text-[12.5px] text-muted">{t('pay.hint')} <b className="text-cream">#{order.id}</b></p>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <button onClick={() => { haptic.tap(); open('https://payme.uz'); }} className="rounded-2xl border border-line bg-surface-2 py-3 text-[14px] font-bold">
+        <button onClick={() => openApp('https://payme.uz')} className="rounded-2xl border border-line bg-surface-2 py-3 text-[14px] font-bold">
           <span className="text-[#2cc5bd]">●</span> Payme
         </button>
-        <button onClick={() => { haptic.tap(); open('https://click.uz'); }} className="rounded-2xl border border-line bg-surface-2 py-3 text-[14px] font-bold">
+        <button onClick={() => openApp('https://click.uz')} className="rounded-2xl border border-line bg-surface-2 py-3 text-[14px] font-bold">
           <span className="text-[#1aa6e6]">●</span> Click
         </button>
       </div>

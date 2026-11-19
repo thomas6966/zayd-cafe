@@ -90,10 +90,10 @@ const quote = asyncH(async (req, res) => {
 });
 
 const createOrder = asyncH(async (req, res) => {
-  const { deliveryType, paymentMethod = 'TERMINAL', phone, address, latitude, longitude, comment } = req.body || {};
+  const { deliveryType, paymentMethod = 'ONLINE', phone, address, latitude, longitude, comment } = req.body || {};
 
   if (!['PICKUP', 'DELIVERY'].includes(deliveryType)) return res.status(400).json({ error: "Yetkazish turi noto'g'ri" });
-  if (!['ONLINE', 'TERMINAL'].includes(paymentMethod)) return res.status(400).json({ error: "To'lov turi noto'g'ri" });
+  if (paymentMethod !== 'ONLINE') return res.status(400).json({ error: "To'lov turi noto'g'ri" });
   const cleanPhone = String(phone || '').replace(/[^\d+]/g, '');
   if (cleanPhone.replace(/\D/g, '').length < 9) return res.status(400).json({ error: "Telefon raqamini to'g'ri kiriting" });
   const hasGeo = Number.isFinite(latitude) && Number.isFinite(longitude);

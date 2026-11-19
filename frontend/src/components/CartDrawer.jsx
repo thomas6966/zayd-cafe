@@ -23,7 +23,6 @@ export default function CartDrawer() {
   const { setQty, clearCart, setPhone, setPlaced, showToast, refreshOrders } = useStore.getState();
 
   const [deliveryType, setDeliveryType] = useState('PICKUP');
-  const [payment, setPayment] = useState('ONLINE');
   const [phone, setPhoneInput] = useState(savedPhone || '+998');
   const [address, setAddress] = useState('');
   const [geo, setGeo] = useState(null);
@@ -39,7 +38,7 @@ export default function CartDrawer() {
   const lines = cart.map((l) => ({ ...l, product: products.get(l.productId) })).filter((l) => l.product);
   const addons = config.addons;
   const hasCard = Boolean(config.settings.cardNumber);
-  const pay = hasCard ? payment : 'TERMINAL';
+  const pay = 'ONLINE';
   const localSubtotal = lines.reduce((s, l) => s + unitPrice(l, l.product, addons) * l.quantity, 0);
 
   // Serverdan narx (promo-kod, yetkazish narxi) — kichik kechikish bilan
@@ -188,17 +187,14 @@ export default function CartDrawer() {
             {promoErr && <p className="mt-2 text-[13px] font-semibold text-bad">{promoErr}</p>}
 
             <Label>{t('cart.payment')}</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {hasCard && (
-                <button className={opt(pay === 'ONLINE')} onClick={() => { haptic.select(); setPayment('ONLINE'); }}>
-                  <div className="text-xl">💳</div><div className="mt-1">{t('cart.online')}</div><div className="text-[11px] font-medium opacity-70">{t('cart.onlineSub')}</div>
-                </button>
-              )}
-              <button className={opt(pay === 'TERMINAL')} onClick={() => { haptic.select(); setPayment('TERMINAL'); }}>
-                <div className="text-xl">🏧</div><div className="mt-1">{t('cart.terminal')}</div><div className="text-[11px] font-medium opacity-70">{t('cart.terminalSub')}</div>
-              </button>
+            <div className="flex items-center gap-3 rounded-2xl border border-accent bg-accent/10 px-4 py-3">
+              <span className="text-2xl">💳</span>
+              <div className="min-w-0">
+                <p className="text-[14px] font-bold">{t('cart.online')}</p>
+                <p className="text-[12px] text-muted">{t('cart.payInfo')}</p>
+              </div>
             </div>
-            <p className="mt-2 text-[12px] text-muted">{pay === 'ONLINE' ? t('cart.payHintOnline') : t('cart.payHintTerminal')}</p>
+            <p className="mt-2 text-[12px] text-muted">{t('cart.payHintOnline')}</p>
 
             <div className="mt-5 space-y-2 rounded-2xl border border-line bg-surface-2 p-4 text-[14px]">
               <div className="flex justify-between"><span className="text-muted">{t('cart.subtotal')}</span><span className="font-semibold">{money(totals.subtotal)}</span></div>
@@ -213,8 +209,9 @@ export default function CartDrawer() {
           </div>
 
           <div className="glass safe-bottom shrink-0 border-x-0 border-b-0 px-5 pt-3">
+            {!hasCard && <p className="mb-2 text-center text-[13px] font-semibold text-bad">{t('cart.noCard')}</p>}
             {(error || belowMin) && <p className="mb-2 text-center text-[13px] font-semibold text-bad">{belowMin ? `${t('cart.minOrder')}: ${money(minOrder)} ${t('sum')}` : error}</p>}
-            <button className="btn-primary flex w-full items-center justify-between" disabled={busy || belowMin} onClick={place}>
+            <button className="btn-primary flex w-full items-center justify-between" disabled={busy || belowMin || !hasCard} onClick={place}>
               <span>{busy ? t('cart.placing') : t('cart.place')}</span>
               {!busy && <span>{money(total)}</span>}
             </button>
