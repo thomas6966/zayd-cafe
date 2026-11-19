@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Playfair+Display:wght@700&display=swap&subset=cyrillic,latin-ext" rel="stylesheet" />
+<style>
+  :root { --bg:#0e150f; --cream:#f4efd8; --accent:#b4c76f; --accent2:#7f9a3d; --muted:#9fa994; --gold:#e8d28f; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); font-family: Manrope, system-ui, sans-serif; color: var(--cream); }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+
+  /* Sarlavha */
+  #head { position: absolute; left: 60px; right: 60px; top: 110px; text-align: center; }
+  #badge { display: inline-block; padding: 14px 34px; border-radius: 999px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0d150e; font-weight: 800; font-size: 40px; letter-spacing: 3px; }
+  #title { margin-top: 22px; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 68px; line-height: 1.1; }
+  #sub { margin-top: 14px; font-size: 38px; font-weight: 700; color: var(--accent); }
+
+  /* Telefon */
+  #phone { position: absolute; left: 240px; top: 440px; width: 600px; height: 1270px; border-radius: 78px; background: #05080a; padding: 14px; box-shadow: 0 60px 140px -30px rgba(0,0,0,.85), 0 0 0 3px #2a3a2e, inset 0 0 0 2px #1a2a1f; transform-origin: 50% 0%; }
+  #notch { position: absolute; top: 24px; left: 50%; width: 150px; height: 34px; margin-left: -75px; border-radius: 20px; background: #05080a; z-index: 20; }
+  #screenwrap { position: relative; width: 572px; height: 1242px; border-radius: 64px; overflow: hidden; background: #0e150f; }
+  #screen { position: absolute; left: 0; top: 0; width: 390px; height: 844px; transform: scale(1.4667); transform-origin: 0 0; overflow: hidden; }
+  .layer { position: absolute; inset: 0; width: 390px; height: 844px; opacity: 0; }
+  img.layer { object-fit: cover; }
+
+  /* Bosish va ajratish */
+  .tap { position: absolute; width: 0; height: 0; z-index: 30; pointer-events: none; }
+  .tap .ring { position: absolute; border-radius: 50%; border: 4px solid var(--accent); background: rgba(180,199,111,.28); transform: translate(-50%, -50%); }
+  .tap .hand { position: absolute; font-size: 54px; transform: translate(-14px, -6px); filter: drop-shadow(0 6px 8px rgba(0,0,0,.5)); }
+  .hl { position: absolute; border-radius: 14px; border: 3px solid var(--gold); box-shadow: 0 0 0 6px rgba(232,210,143,.22), 0 0 30px rgba(232,210,143,.5); z-index: 25; pointer-events: none; opacity: 0; }
+  #toast { position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); z-index: 40; padding: 12px 22px; border-radius: 999px; background: rgba(22,32,26,.95); border: 1px solid rgba(244,239,216,.18); font-weight: 800; font-size: 15px; color: var(--cream); white-space: nowrap; opacity: 0; }
+
+  /* Maxsus ekranlar (Telegram chat, bank ilovasi, chiqish) */
+  .tg { background: #0e1621; font-family: system-ui, 'Segoe UI', sans-serif; }
+  .tg .bar { position: absolute; left: 0; right: 0; top: 0; height: 70px; background: #17212b; display: flex; align-items: center; gap: 12px; padding: 22px 14px 0; }
+  .tg .bar img { width: 40px; height: 40px; border-radius: 50%; }
+  .tg .bar b { display: block; font-size: 16px; color: #fff; }
+  .tg .bar span { font-size: 12px; color: #6d7f8f; }
+  .bub { position: absolute; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; color: #fff; }
+  .bub.bot { left: 14px; width: 318px; background: #182533; border-bottom-left-radius: 4px; }
+  .bub.me { right: 14px; background: #2b5278; border-bottom-right-radius: 4px; }
+  .ibtn { position: absolute; left: 14px; width: 318px; height: 42px; border-radius: 12px; background: rgba(23,33,43,.95); border: 1px solid rgba(255,255,255,.08); color: #8fc2f0; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+
+  .bank { background: #f3f5f8; color: #14202b; font-family: system-ui, 'Segoe UI', sans-serif; }
+  .bank .top { position: absolute; left: 0; right: 0; top: 0; height: 96px; background: #fff; border-bottom: 1px solid #e3e7ec; padding: 50px 18px 0; font-weight: 800; font-size: 19px; }
+  .bank .chip { position: absolute; top: 110px; left: 18px; padding: 6px 14px; border-radius: 999px; background: #e7eef6; color: #35506b; font-weight: 700; font-size: 13px; }
+  .bank .lbl { position: absolute; left: 20px; font-size: 13px; color: #6b7b8a; font-weight: 700; }
+  .bank .inp { position: absolute; left: 18px; right: 18px; height: 58px; background: #fff; border: 2px solid #d7dee6; border-radius: 14px; padding: 0 16px; display: flex; align-items: center; font-size: 21px; font-weight: 800; letter-spacing: 1px; }
+  .bank .inp.on { border-color: #3a86d8; }
+  .bank .go { position: absolute; left: 18px; right: 18px; bottom: 60px; height: 58px; border-radius: 16px; background: #3a86d8; color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .bank .ok { position: absolute; inset: 0; background: rgba(243,245,248,.96); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-weight: 800; font-size: 22px; }
+  .bank .ok i { width: 96px; height: 96px; border-radius: 50%; background: #2fa866; color: #fff; font-style: normal; font-size: 58px; display: grid; place-items: center; }
+
+  #outro { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; text-align: center; z-index: 50; }
+  #outro img { width: 430px; height: 430px; border-radius: 50%; box-shadow: 0 30px 120px -10px rgba(180,199,111,.55); }
+  #outro h1 { margin-top: 70px; font-family: 'Playfair Display', Georgia, serif; font-size: 112px; line-height: 1.05; }
+  #outro p { margin-top: 36px; font-size: 54px; font-weight: 800; color: var(--accent); }
+  #outro small { margin-top: 22px; font-size: 38px; color: var(--muted); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:#2c3f17;left:-300px;top:-200px;opacity:.7"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:#4a5d23;right:-300px;bottom:-150px;opacity:.45"></div>
+  </div>
+
+  <div id="head"><span id="badge"></span><div id="title"></div><div id="sub"></div></div>
+
+  <div id="phone">
+    <div id="notch"></div>
+    <div id="screenwrap"><div id="screen"><div id="zoomer" style="position:absolute;left:0;top:0;width:390px;height:844px">
+      <img class="layer" id="L-splash" src="shots/splash.png" />
+      <img class="layer" id="L-menu" src="shots/menu.png" />
+      <img class="layer" id="L-modal" src="shots/modal.png" />
+      <img class="layer" id="L-menu-cartbar" src="shots/menu-cartbar.png" />
+      <img class="layer" id="L-cart-top" src="shots/cart-top.png" />
+      <img class="layer" id="L-cart-bottom" src="shots/cart-bottom.png" />
+      <img class="layer" id="L-pay" src="shots/pay.png" />
+      <img class="layer" id="L-pay-pending" src="shots/pay-pending.png" />
+      <img class="layer" id="L-orders" src="shots/orders.png" />
+
+      <div class="layer tg" id="L-chat">
+        <div class="bar"><img src="logo.png" /><div><b>ZAYD Cafe</b><span>bot</span></div></div>
+        <div class="bub me" style="top:92px">/start</div>
+        <div class="bub bot" style="top:150px">Assalomu alaykum, <b>Zayd</b>! 👋<br><br><b>ZAYD Cafe</b> ga xush kelibsiz.<br>Menyuni ko'rish va buyurtma berish uchun pastdagi tugmani bosing.</div>
+        <div class="ibtn" style="top:340px">🍽 Buyurtma berish</div>
+      </div>
+
+      <div class="layer tg" id="L-notif">
+        <div class="bar"><img src="logo.png" /><div><b>ZAYD Cafe</b><span>bot</span></div></div>
+        <div class="bub bot" style="top:100px" id="n1">🆕 Buyurtmangiz qabul qilindi<br><b>Buyurtma #27</b><br>Jami: <b>110 000 so'm</b><br><br>⏳ To'lovingiz tekshirilmoqda.</div>
+        <div class="bub bot" style="top:290px" id="n2">✅ To'lovingiz tasdiqlandi!<br><b>Buyurtma #27</b> tayyorlanmoqda.</div>
+        <div class="bub bot" style="top:390px" id="n3">🎉 Buyurtma tayyor! Yoqimli ishtaha!</div>
+      </div>
+
+      <div class="layer bank" id="L-bank">
+        <div class="top">‹ &nbsp;Kartaga o'tkazma</div>
+        <div class="chip">Payme yoki Click ilovasi</div>
+        <div class="lbl" style="top:166px">Karta raqami</div>
+        <div class="inp" id="bk-card" style="top:190px"><span id="bk-card-t"></span><span id="bk-cur" style="color:#3a86d8">|</span></div>
+        <div class="lbl" style="top:270px">Summa</div>
+        <div class="inp" id="bk-sum" style="top:294px"><span id="bk-sum-t"></span></div>
+        <div class="go" id="bk-go">O'tkazish</div>
+        <div class="ok" id="bk-ok" style="opacity:0"><i>✓</i>O'tkazma amalga oshdi</div>
+      </div>
+
+      <div class="hl" id="hl"></div>
+      <div class="tap" id="tap"><div class="ring" id="ring"></div><div class="hand" id="hand">👆</div></div>
+      <div id="toast"></div>
+    </div></div></div>
+  </div>
+
+  <div id="outro">
+    <img src="logo.png" />
+    <h1>Yoqimli<br>ishtaha!</h1>
+    <p>@zaydcafe_bot</p>
+    <small>Telegramda ZAYD Cafe botini toping</small>
+  </div>
+</div>
+
+<script>
+const D = window.__DATA;          // { scenes:[{id,voice,badge,title,sub,dur}], rects }
+const R = D.rects;
+const HEAD = 0.5, TAIL = 0.7, FADE = 0.35;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const $ = (id) => document.getElementById(id);
+
+// --- vaqt jadvali
+let acc = 0;
+const tl = D.scenes.map((s) => { const len = HEAD + s.dur + TAIL; const o = { ...s, start: acc, len }; acc += len; return o; });
+window.TOTAL = acc;
+// ovoz matnidagi iboraning tugash (yoki boshlanish) vaqti, sahna boshiga nisbatan
+const W = (s, phrase, edge = 'end') => {
+  const i = s.voice.indexOf(phrase);
+  if (i < 0) throw new Error('ibora topilmadi: ' + phrase);
+  return HEAD + s.dur * ((edge === 'end' ? i + phrase.length : i) / s.voice.length);
+};
+const center = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
+const fixed = { chatBtn: { x: 14, y: 340, w: 318, h: 42 }, bankGo: { x: 18, y: 726, w: 354, h: 58 } };
+
+// --- sahna ssenariylari: shots [nom, kirish, chiqish], taps, hls, toast
+const plan = {
+  s0: (s) => ({ shots: [['splash', 0, 99]], taps: [], hls: [] }),
+  s1: (s) => { const t = W(s, 'tugmasini bosing'); return { shots: [['chat', 0, t + 0.5], ['menu', t + 0.5, 99]], taps: [{ t: t - 0.2, ...center(fixed.chatBtn) }], hls: [{ a: W(s, 'Buyurtma berish', 'start') - 0.5, b: t, ...fixed.chatBtn }] }; },
+  s2: (s) => { const t1 = W(s, 'tanlang.'), t2 = W(s, 'tugmasini bosing'); return { shots: [['menu', 0, t1 + 0.4], ['modal', t1 + 0.4, 99]], taps: [{ t: t1 - 0.1, ...center(R['menu.kapuchino']) }, { t: t2 - 0.15, ...center(R['modal.add']) }], hls: [{ a: W(s, 'shakar', 'start'), b: W(s, 'belgilang'), x: 12, y: 478, w: 366, h: 84 }] }; },
+  s3: (s) => { const t1 = W(s, 'tugmasini bosing.'), t2 = W(s, 'tanlang,'), t3 = W(s, 'To\'lovga o\'tish'); return { shots: [['menu-cartbar', 0, t1 + 0.3], ['cart-top', t1 + 0.3, t2], ['cart-bottom', t2, 99]], taps: [{ t: t1 - 0.4, ...center(R['menu.cartbar']) }, { t: s.len - 1.0, ...center(R['cart.place']) }], hls: [{ a: W(s, 'telefon raqamingizni', 'start'), b: W(s, 'yozing'), x: 14, y: 236, w: 362, h: 46 }] }; },
+  s4: (s) => { const t = W(s, 'tugmasi bilan'); return { shots: [['pay', 0, 99]], taps: [{ t: t - 0.1, ...center(R['pay.copy']) }], hls: [{ a: 0.6, b: t + 0.2, x: R['pay.card'].x - 8, y: R['pay.card'].y - 6, w: R['pay.card'].w + 16, h: R['pay.card'].h + 12 }], toast: { a: t + 0.15, b: s.len, text: '✓ Karta raqami nusxalandi' } }; },
+  s5: (s) => ({ shots: [['bank', 0, 99]], taps: [{ t: s.len - 1.3, ...center(fixed.bankGo) }], hls: [], bank: { paste: W(s, 'joylashtiring'), sum: W(s, 'summani'), go: s.len - 1.3 } }),
+  s6: (s) => { const t = W(s, 'tugmasini bosing'); return { shots: [['pay', 0, t + 0.4], ['pay-pending', t + 0.4, 99]], taps: [{ t: t - 0.2, ...center(R['pay.paid']) }], hls: [{ a: 0.4, b: t, ...R['pay.paid'] }] }; },
+  s7: (s) => { const t1 = W(s, 'xabar keladi.'); return { shots: [['notif', 0, t1 + 0.3], ['orders', t1 + 0.3, 99]], taps: [], hls: [{ a: W(s, 'Buyurtmalar,'), b: s.len, x: 100, y: 770, w: 190, h: 70 }], notif: { n2: W(s, 'Telegramga', 'start'), n3: W(s, 'Telegramga', 'start') + 1.6 } }; },
+  s8: (s) => ({ shots: [], taps: [], hls: [], outro: true }),
+};
+const cfg = tl.map((s) => ({ ...plan[s.id](s) }));
+
+const show = (name, a) => { const el = $('L-' + name); if (el) el.style.opacity = a; };
+const allLayers = ['splash','menu','modal','menu-cartbar','cart-top','cart-bottom','pay','pay-pending','orders','chat','notif','bank'];
+
+window.render = (T) => {
+  T = Math.min(T, window.TOTAL - 0.001);
+  let i = tl.findIndex((s) => T >= s.start && T < s.start + s.len); if (i < 0) i = tl.length - 1;
+  const s = tl[i], c = cfg[i], lt = T - s.start;
+
+  // fon
+  $('b1').style.transform = `translate(${Math.sin(T * 0.3) * 60}px, ${Math.cos(T * 0.25) * 50}px)`;
+  $('b2').style.transform = `translate(${Math.cos(T * 0.28) * 60}px, ${Math.sin(T * 0.3) * 50}px)`;
+
+  // sarlavha (sahna boshida paydo bo'ladi, oxirida so'nadi)
+  const hv = ease(lt / 0.45) * (1 - clamp((lt - (s.len - 0.3)) / 0.3));
+  const head = $('head'); head.style.opacity = hv; head.style.transform = `translateY(${(1 - ease(lt / 0.45)) * 30}px)`;
+  if (head.dataset.s !== s.id) { head.dataset.s = s.id; $('badge').textContent = s.badge; $('title').textContent = s.title; $('sub').textContent = s.sub; }
+  head.style.display = c.outro ? 'none' : 'block';
+
+  // telefon
+  const ph = $('phone');
+  ph.style.display = c.outro ? 'none' : 'block';
+  const enter = i === 0 ? ease(lt / 0.8) : 1;
+  const zoom = 0.92 * (1 + 0.016 * (lt / s.len));
+  ph.style.opacity = enter; ph.style.transform = `translateY(${(1 - enter) * 120}px) scale(${zoom})`;
+  $('outro').style.display = c.outro ? 'flex' : 'none';
+  if (c.outro) { const o = ease(lt / 0.7); $('outro').style.opacity = o; $('outro').style.transform = `scale(${0.94 + 0.06 * o})`; }
+
+  // muhim joyga yaqinlashtirish (zoom): ajratish ramkalari va bosishlar atrofida
+  let zBest = { w: 0, x: 195, y: 422, z: 1 };
+  const seg = (a, b, x, y, z) => { const w = ease((lt - a) / 0.5) * (1 - ease((lt - b) / 0.5)); if (w > zBest.w) zBest = { w, x, y, z }; };
+  for (const hh of c.hls) seg(hh.a - 0.2, hh.b + 0.2, hh.x + hh.w / 2, hh.y + hh.h / 2, 1.16);
+  for (const tt of c.taps) seg(tt.t - 0.9, tt.t + 0.8, tt.x, tt.y, 1.1);
+  $('zoomer').style.transformOrigin = zBest.x + 'px ' + zBest.y + 'px';
+  $('zoomer').style.transform = 'scale(' + (1 + (zBest.z - 1) * zBest.w) + ')';
+
+  // ekranlar (crossfade)
+  allLayers.forEach((n) => show(n, 0));
+  for (const [name, a, b] of c.shots) show(name, clamp((lt - a) / FADE) * (1 - clamp((lt - b) / FADE)));
+
+  // Telegram bildirishnomalari
+  if (c.notif) { const f = (t) => ease((lt - t) / 0.4); for (const k of ['n2', 'n3']) { const v = f(c.notif[k]); $(k).style.opacity = v; $(k).style.transform = `translateY(${(1 - v) * 20}px)`; } }
+
+  // bank ilovasi: raqam joylashtiriladi, summa, o'tkazish
+  if (c.bank) {
+    const b = c.bank, card = '8600 1234 5678 9012';
+    const p = clamp((lt - b.paste) / 0.5);
+    $('bk-card-t').textContent = lt >= b.paste ? card.slice(0, Math.ceil(card.length * p)) : '';
+    $('bk-card').classList.toggle('on', lt >= b.paste && lt < b.sum);
+    $('bk-sum-t').textContent = lt >= b.sum ? '110 000 so\'m' : '';
+    $('bk-sum').classList.toggle('on', lt >= b.sum);
+    $('bk-cur').style.opacity = Math.floor(T * 2) % 2 ? 0 : 1;
+    $('bk-ok').style.opacity = ease((lt - (b.go + 0.5)) / 0.4);
+  }
+
+  // ajratish ramkasi
+  const hl = $('hl'); let hv2 = 0, cur = null;
+  for (const h of c.hls) { if (lt >= h.a && lt <= h.b) { cur = h; hv2 = ease((lt - h.a) / 0.3) * (0.75 + 0.25 * Math.sin(T * 7)); } }
+  if (cur) Object.assign(hl.style, { left: cur.x + 'px', top: cur.y + 'px', width: cur.w + 'px', height: cur.h + 'px' });
+  hl.style.opacity = hv2;
+
+  // barmoq bosishi
+  const tapEl = $('tap'); let tv = 0;
+  for (const t of c.taps) {
+    const d = lt - t.t;
+    if (d > -0.5 && d < 1.0) {
+      tapEl.style.left = t.x + 'px'; tapEl.style.top = t.y + 'px';
+      const appear = ease((d + 0.5) / 0.35), press = clamp(d / 0.45), fade = 1 - clamp((d - 0.7) / 0.3);
+      tv = appear * fade;
+      const r = d < 0 ? 22 : 22 + press * 36;
+      Object.assign($('ring').style, { width: r * 2 + 'px', height: r * 2 + 'px', opacity: d < 0 ? 0.55 : (1 - press) * 0.9 });
+      $('hand').style.transform = `translate(-14px, ${-6 + (d > 0 && d < 0.18 ? 10 : 0) + (1 - appear) * 40}px) scale(${d > 0 && d < 0.18 ? 0.9 : 1})`;
+    }
+  }
+  tapEl.style.opacity = tv;
+
+  // toast
+  const toast = $('toast');
+  if (c.toast) { toast.textContent = c.toast.text; toast.style.opacity = ease((lt - c.toast.a) / 0.25) * (lt <= c.toast.b ? 1 : 0); } else toast.style.opacity = 0;
+};
+window.READY = true;
+</script>
+</body>
+</html>

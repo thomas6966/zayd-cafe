@@ -74,10 +74,10 @@ export default function PayPanel({ order, onChange }) {
         <p className="mt-0.5 text-[26px] font-black text-gold">{money(order.total)} <span className="text-[13px] font-semibold text-muted">{t('sum')}</span></p>
 
         <p className="mt-4 text-[12px] font-bold uppercase tracking-widest text-muted">{t('pay.card')}</p>
-        <div className="mt-1 flex items-center justify-between gap-2">
-          <p className="whitespace-nowrap font-mono text-[17px] font-extrabold">{fmtCard(cardNumber)}</p>
+        <div className="mt-1 flex items-center justify-between gap-1.5">
+          <p className="whitespace-nowrap font-mono text-[16px] font-extrabold">{fmtCard(cardNumber)}</p>
           <button onClick={() => onCopy(String(cardNumber).replace(/\D/g, ''), t('pay.copied'))}
-            className="shrink-0 rounded-full border border-accent px-3 py-1.5 text-[12.5px] font-bold text-accent active:scale-95">📋 {t('pay.copy')}</button>
+            className="shrink-0 rounded-full border border-accent px-2.5 py-1.5 text-[12px] font-bold text-accent active:scale-95">📋 {t('pay.copy')}</button>
         </div>
         {cardHolder && <p className="mt-1 text-[13px] text-muted">{cardHolder}</p>}
         <p className="mt-3 text-[12.5px] text-muted">{t('pay.hint')} <b className="text-cream">#{order.id}</b></p>

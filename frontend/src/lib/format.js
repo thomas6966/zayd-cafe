@@ -11,8 +11,12 @@ export const STATUS = {
   CANCELLED: { label: 'Bekor qilindi', color: 'bg-red-500', emoji: '❌' },
 };
 
-export const timeStr = (iso, locale = 'uz-UZ') =>
-  new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+// Sana: oy nomisiz (har qanday qurilmada bir xil ishlaydi): 19.11 15:38
+export const timeStr = (iso) => {
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}.${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
 
 // Til bo'yicha nom: o'zbekchada nameUz (bo'lsa), aks holda ruscha asosiy nom
 export const loc = (item, lang) => (lang === 'uz' && item?.nameUz ? item.nameUz : item?.name);
