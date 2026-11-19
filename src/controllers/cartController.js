@@ -2,7 +2,7 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
-const { notifyNewOrder } = require('./botController');
+const { notifyNewOrder, notifyPaymentPending } = require('./botController');
 
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -90,10 +90,10 @@ const quote = asyncH(async (req, res) => {
 });
 
 const createOrder = asyncH(async (req, res) => {
-  const { deliveryType, paymentMethod = 'CASH', phone, address, latitude, longitude, comment } = req.body || {};
+  const { deliveryType, paymentMethod = 'TERMINAL', phone, address, latitude, longitude, comment } = req.body || {};
 
   if (!['PICKUP', 'DELIVERY'].includes(deliveryType)) return res.status(400).json({ error: "Yetkazish turi noto'g'ri" });
-  if (!['CASH', 'TERMINAL'].includes(paymentMethod)) return res.status(400).json({ error: "To'lov turi noto'g'ri" });
+  if (!['ONLINE', 'TERMINAL'].includes(paymentMethod)) return res.status(400).json({ error: "To'lov turi noto'g'ri" });
   const cleanPhone = String(phone || '').replace(/[^\d+]/g, '');
   if (cleanPhone.replace(/\D/g, '').length < 9) return res.status(400).json({ error: "Telefon raqamini to'g'ri kiriting" });
   const hasGeo = Number.isFinite(latitude) && Number.isFinite(longitude);
@@ -113,6 +113,8 @@ const createOrder = asyncH(async (req, res) => {
     return res.status(400).json({ error: `Minimal buyurtma summasi: ${new Intl.NumberFormat('ru-RU').format(q.settings.minOrder)} so'm` });
   }
 
+  if (paymentMethod === 'ONLINE' && !q.settings.cardNumber) return res.status(400).json({ error: "Onlayn to'lov hozircha mavjud emas" });
+
   await User.setPhone(req.user.id, cleanPhone);
   const order = await Order.create({
     userId: req.user.id,
@@ -131,6 +133,20 @@ const createOrder = asyncH(async (req, res) => {
   res.status(201).json(order);
 });
 
+// Mijoz "to'ladim" tugmasini bosdi -> admin tekshiradi
+const markPaid = asyncH(async (req, res) => {
+  const order = await Order.findById(Number(req.params.id));
+  if (!order || order.userId !== req.user.id) return res.status(404).json({ error: 'Buyurtma topilmadi' });
+  if (order.paymentMethod !== 'ONLINE') return res.status(400).json({ error: "Bu buyurtma onlayn to'lov emas" });
+  if (order.status === 'CANCELLED') return res.status(400).json({ error: 'Buyurtma bekor qilingan' });
+  if (order.paymentStatus === 'UNPAID') {
+    const updated = await Order.setPayment(order.id, 'PENDING');
+    notifyPaymentPending(updated).catch((e) => console.error('[notify]', e.message));
+    return res.json(updated);
+  }
+  res.json(order);
+});
+
 const myOrders = asyncH(async (req, res) => {
   res.json(await Order.findByUser(req.user.id));
 });
@@ -141,4 +157,4 @@ const getOrder = asyncH(async (req, res) => {
   res.json(order);
 });
 
-module.exports = { getMenu, getConfig, quote, createOrder, myOrders, getOrder };
+module.exports = { getMenu, getConfig, quote, createOrder, markPaid, myOrders, getOrder };

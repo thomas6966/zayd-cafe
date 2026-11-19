@@ -39,17 +39,20 @@ const updateAddon = (id, data) => prisma.addon.update({ where: { id }, data });
 const deleteAddon = (id) => prisma.addon.delete({ where: { id } });
 
 // ---------- Sozlamalar (key/value) ----------
-const DEFAULT_SETTINGS = { deliveryFee: 0, freeDeliveryFrom: 0, minOrder: 0 };
+const DEFAULT_SETTINGS = { deliveryFee: 0, freeDeliveryFrom: 0, minOrder: 0, cardNumber: '', cardHolder: '' };
+const TEXT_KEYS = ['cardNumber', 'cardHolder'];
 async function getSettings() {
   const rows = await prisma.setting.findMany();
   const out = { ...DEFAULT_SETTINGS };
-  for (const r of rows) if (r.key in out) out[r.key] = Number(r.value) || 0;
+  for (const r of rows) if (r.key in out) out[r.key] = TEXT_KEYS.includes(r.key) ? r.value : Number(r.value) || 0;
   return out;
 }
 async function saveSettings(input) {
   for (const key of Object.keys(DEFAULT_SETTINGS)) {
     if (input[key] === undefined) continue;
-    const value = String(Math.max(0, Math.round(Number(input[key]) || 0)));
+    const value = TEXT_KEYS.includes(key)
+      ? String(input[key] ?? '').trim().slice(0, 60)
+      : String(Math.max(0, Math.round(Number(input[key]) || 0)));
     await prisma.setting.upsert({ where: { key }, update: { value }, create: { key, value } });
   }
   return getSettings();

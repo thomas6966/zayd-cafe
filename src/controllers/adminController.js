@@ -2,7 +2,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
-const { notifyStatus } = require('./botController');
+const { notifyStatus, notifyPaymentConfirmed } = require('./botController');
 
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const STATUSES = ['NEW', 'PREPARING', 'READY', 'DELIVERING', 'COMPLETED', 'CANCELLED'];
@@ -30,8 +30,22 @@ const setStatus = asyncH(async (req, res) => {
   if (status === 'DELIVERING' && existing.deliveryType !== 'DELIVERY') {
     return res.status(400).json({ error: "Olib ketish buyurtmasi uchun \"yo'lda\" statusi yo'q" });
   }
+  // Onlayn to'lov tasdiqlanmaguncha tayyorlash boshlanmaydi
+  if (existing.paymentMethod === 'ONLINE' && existing.paymentStatus !== 'PAID' && ['PREPARING', 'READY', 'DELIVERING'].includes(status)) {
+    return res.status(400).json({ error: "Avval to'lovni tasdiqlang" });
+  }
   const order = await Order.updateStatus(existing.id, status);
   if (existing.status !== status) notifyStatus(order).catch((e) => console.error('[notify]', e.message));
+  res.json(order);
+});
+
+const setPayment = asyncH(async (req, res) => {
+  const { paymentStatus } = req.body || {};
+  if (!['UNPAID', 'PENDING', 'PAID'].includes(paymentStatus)) return res.status(400).json({ error: "To'lov holati noto'g'ri" });
+  const existing = await Order.findById(Number(req.params.id));
+  if (!existing) return res.status(404).json({ error: 'Buyurtma topilmadi' });
+  const order = await Order.setPayment(existing.id, paymentStatus);
+  if (paymentStatus === 'PAID' && existing.paymentStatus !== 'PAID') notifyPaymentConfirmed(order).catch((e) => console.error('[notify]', e.message));
   res.json(order);
 });
 
@@ -134,7 +148,7 @@ const saveSettings = asyncH(async (req, res) => res.json(await Product.saveSetti
 module.exports = {
   stats, customers, listAddons, createAddon, updateAddon, deleteAddon,
   listPromos, createPromo, updatePromo, deletePromo, getSettings, saveSettings,
-  me, listOrders, getOrder, setStatus, getMenu,
+  me, listOrders, getOrder, setStatus, setPayment, getMenu,
   createCategory, updateCategory, deleteCategory,
   createProduct, updateProduct, deleteProduct,
 };

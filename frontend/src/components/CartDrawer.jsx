@@ -23,7 +23,7 @@ export default function CartDrawer() {
   const { setQty, clearCart, setPhone, setPlaced, showToast, refreshOrders } = useStore.getState();
 
   const [deliveryType, setDeliveryType] = useState('PICKUP');
-  const [payment, setPayment] = useState('CASH');
+  const [payment, setPayment] = useState('ONLINE');
   const [phone, setPhoneInput] = useState(savedPhone || '+998');
   const [address, setAddress] = useState('');
   const [geo, setGeo] = useState(null);
@@ -38,6 +38,8 @@ export default function CartDrawer() {
   const products = useMemo(() => productMap(menu), [menu]);
   const lines = cart.map((l) => ({ ...l, product: products.get(l.productId) })).filter((l) => l.product);
   const addons = config.addons;
+  const hasCard = Boolean(config.settings.cardNumber);
+  const pay = hasCard ? payment : 'TERMINAL';
   const localSubtotal = lines.reduce((s, l) => s + unitPrice(l, l.product, addons) * l.quantity, 0);
 
   // Serverdan narx (promo-kod, yetkazish narxi) — kichik kechikish bilan
@@ -90,7 +92,7 @@ export default function CartDrawer() {
     try {
       const order = await api.post('/api/orders', {
         items: lines.map((l) => ({ productId: l.productId, quantity: l.quantity, note: l.note, addonIds: l.addonIds || [] })),
-        deliveryType, paymentMethod: payment, phone, comment, promoCode: applied || undefined,
+        deliveryType, paymentMethod: pay, phone, comment, promoCode: applied || undefined,
         address: deliveryType === 'DELIVERY' ? address : undefined,
         ...(deliveryType === 'DELIVERY' && geo ? geo : {}),
       });
@@ -187,10 +189,16 @@ export default function CartDrawer() {
 
             <Label>{t('cart.payment')}</Label>
             <div className="grid grid-cols-2 gap-2">
-              <button className={opt(payment === 'CASH')} onClick={() => { haptic.select(); setPayment('CASH'); }}><div className="text-xl">💵</div><div className="mt-1">{t('cart.cash')}</div></button>
-              <button className={opt(payment === 'TERMINAL')} onClick={() => { haptic.select(); setPayment('TERMINAL'); }}><div className="text-xl">💳</div><div className="mt-1">{t('cart.terminal')}</div></button>
+              {hasCard && (
+                <button className={opt(pay === 'ONLINE')} onClick={() => { haptic.select(); setPayment('ONLINE'); }}>
+                  <div className="text-xl">💳</div><div className="mt-1">{t('cart.online')}</div><div className="text-[11px] font-medium opacity-70">{t('cart.onlineSub')}</div>
+                </button>
+              )}
+              <button className={opt(pay === 'TERMINAL')} onClick={() => { haptic.select(); setPayment('TERMINAL'); }}>
+                <div className="text-xl">🏧</div><div className="mt-1">{t('cart.terminal')}</div><div className="text-[11px] font-medium opacity-70">{t('cart.terminalSub')}</div>
+              </button>
             </div>
-            <p className="mt-2 text-[12px] text-muted">{t('cart.payHint')}</p>
+            <p className="mt-2 text-[12px] text-muted">{pay === 'ONLINE' ? t('cart.payHintOnline') : t('cart.payHintTerminal')}</p>
 
             <div className="mt-5 space-y-2 rounded-2xl border border-line bg-surface-2 p-4 text-[14px]">
               <div className="flex justify-between"><span className="text-muted">{t('cart.subtotal')}</span><span className="font-semibold">{money(totals.subtotal)}</span></div>

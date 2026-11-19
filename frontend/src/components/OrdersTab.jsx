@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useT } from '../lib/i18n.js';
 import { haptic } from '../lib/tg.js';
 import { money, timeStr } from '../lib/format.js';
 import { productMap, useStore } from '../lib/store.js';
+import PayPanel from './PayPanel.jsx';
+import { Sheet } from './ui.jsx';
 
 export const ACTIVE = ['NEW', 'PREPARING', 'READY', 'DELIVERING'];
 
@@ -64,6 +66,7 @@ export default function OrdersTab() {
   const addToCart = useStore((s) => s.addToCart);
   const showToast = useStore((s) => s.showToast);
   const setCartOpen = useStore((s) => s.setCartOpen);
+  const [payOrder, setPayOrder] = useState(null);
   const products = productMap(menu);
   const locale = lang === 'ru' ? 'ru-RU' : 'uz-UZ';
 
@@ -112,7 +115,13 @@ export default function OrdersTab() {
                 <Lines order={o} products={products} />
                 <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
                   <p className="text-[16px] font-extrabold text-gold">{money(o.total)} {t('sum')}</p>
-                  <p className="text-[12px] font-semibold text-muted">{o.paymentMethod === 'CASH' ? t('cart.cash') : t('cart.terminal')}</p>
+                  {o.paymentMethod === 'ONLINE' ? (
+                    o.paymentStatus === 'PAID' ? <p className="text-[12px] font-semibold text-ok">✅ {t('pay.confirmed')}</p>
+                    : o.paymentStatus === 'PENDING' ? <p className="text-[12px] font-semibold text-accent">⏳ {t('pay.pending')}</p>
+                    : <button className="rounded-full bg-accent px-4 py-2 text-[13px] font-bold text-on-accent active:scale-95" onClick={() => setPayOrder(o)}>💳 {t('pay.now')}</button>
+                  ) : (
+                    <p className="text-[12px] font-semibold text-muted">{o.paymentMethod === 'CASH' ? t('pay.cash') : t('pay.terminal')}</p>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -143,6 +152,14 @@ export default function OrdersTab() {
           </div>
         </>
       )}
+      <Sheet open={!!payOrder} onClose={() => setPayOrder(null)}>
+        {payOrder && (
+          <div className="overflow-y-auto px-5 pb-8">
+            <h2 className="mb-3 font-display text-[24px] font-bold">{t('pay.title')} · #{payOrder.id}</h2>
+            <PayPanel order={orders.find((x) => x.id === payOrder.id) || payOrder} onChange={() => {}} />
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 }

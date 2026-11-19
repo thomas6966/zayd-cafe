@@ -8,6 +8,7 @@ router.get('/me', a.me);
 router.get('/orders', a.listOrders);
 router.get('/orders/:id', a.getOrder);
 router.patch('/orders/:id/status', a.setStatus);
+router.patch('/orders/:id/payment', a.setPayment);
 
 router.get('/stats', a.stats);
 router.get('/customers', a.customers);

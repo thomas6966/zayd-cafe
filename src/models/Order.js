@@ -15,6 +15,7 @@ const list = (status) =>
     include,
   });
 
+const setPayment = (id, paymentStatus) => prisma.order.update({ where: { id }, data: { paymentStatus }, include });
 const updateStatus = (id, status) => prisma.order.update({ where: { id }, data: { status }, include });
 
 // Status bo'yicha buyurtmalar soni (admin paneldagi badge'lar uchun)
@@ -23,7 +24,7 @@ const countByStatus = async () => {
   return Object.fromEntries(rows.map((r) => [r.status, r._count._all]));
 };
 
-module.exports = { create, findById, findByUser, list, updateStatus, countByStatus };
+module.exports = { setPayment, create, findById, findByUser, list, updateStatus, countByStatus };
 
 // ---------- Promo-kodlar ----------
 const listPromos = () => prisma.promoCode.findMany({ orderBy: { createdAt: 'desc' } });
@@ -37,6 +38,9 @@ const usePromo = (code) => prisma.promoCode.update({ where: { code }, data: { us
 const TZ_MS = 5 * 3600 * 1000;
 const dayKey = (d) => new Date(new Date(d).getTime() + TZ_MS).toISOString().slice(0, 10);
 
+// Onlayn buyurtma tushumga faqat to'lov tasdiqlangach kiradi
+const PAID_OR_OFFLINE = [{ paymentMethod: { not: 'ONLINE' } }, { paymentStatus: 'PAID' }];
+
 async function getStats() {
   const now = Date.now();
   const todayStr = dayKey(now);
@@ -45,7 +49,7 @@ async function getStats() {
   const since = new Date(startToday - 6 * 86400000);
 
   const [orders, customers, active] = await Promise.all([
-    prisma.order.findMany({ where: { createdAt: { gte: since }, status: { not: 'CANCELLED' } }, select: { id: true, total: true, createdAt: true } }),
+    prisma.order.findMany({ where: { createdAt: { gte: since }, status: { not: 'CANCELLED' }, OR: PAID_OR_OFFLINE }, select: { id: true, total: true, createdAt: true } }),
     prisma.user.count(),
     prisma.order.count({ where: { status: { in: ['NEW', 'PREPARING', 'READY', 'DELIVERING'] } } }),
   ]);
@@ -65,7 +69,7 @@ async function getStats() {
 
   const top = await prisma.orderItem.groupBy({
     by: ['name'], _sum: { quantity: true },
-    where: { order: { createdAt: { gte: since }, status: { not: 'CANCELLED' } } },
+    where: { order: { createdAt: { gte: since }, status: { not: 'CANCELLED' }, OR: PAID_OR_OFFLINE } },
     orderBy: { _sum: { quantity: 'desc' } }, take: 6,
   });
 

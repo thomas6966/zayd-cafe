@@ -40,6 +40,12 @@ async function main() {
 
   app.listen(config.port, () => console.log(`✔ API: http://localhost:${config.port}`));
 
+  // DISABLE_BOT=1: faqat API (test uchun) — bot ishga tushmaydi, Render'dagi webhookka tegmaydi
+  if (process.env.DISABLE_BOT) {
+    console.log("ℹ Bot o'chirilgan (DISABLE_BOT)");
+    return;
+  }
+
   registerBotRoutes();
   const me = await bot.telegram.getMe();
   if (config.publicUrl) {

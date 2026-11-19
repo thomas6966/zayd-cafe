@@ -8,6 +8,7 @@ router.get('/config', c.getConfig); // qo'shimchalar + sozlamalar
 router.post('/quote', c.quote); // narx hisoblash (promo-kod)
 router.post('/orders', requireUser, c.createOrder);
 router.get('/orders/my', requireUser, c.myOrders);
+router.post('/orders/:id/paid', requireUser, c.markPaid);
 router.get('/orders/:id', requireUser, c.getOrder);
 
 module.exports = router;

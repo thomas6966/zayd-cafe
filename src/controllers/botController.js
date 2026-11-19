@@ -7,6 +7,8 @@ const User = require('../models/User');
 const fmt = (n) => new Intl.NumberFormat('ru-RU').format(n) + " so'm";
 const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
+const PAY_LABEL = { CASH: 'Naqd', TERMINAL: 'Terminal (olganda)', ONLINE: "Onlayn karta (to'lov kutilmoqda)" };
+
 const STATUS_TEXT = {
   NEW: '🆕 Buyurtmangiz qabul qilindi',
   PREPARING: '👨‍🍳 Buyurtmangiz tayyorlanmoqda',
@@ -37,6 +39,7 @@ async function onHelp(ctx) {
 
 // Xabar yuborishda xato bo'lsa (masalan, foydalanuvchi botni bloklagan) — faqat log
 async function safeSend(chatId, text, extra) {
+  if (process.env.DISABLE_BOT) return;
   try {
     await bot.telegram.sendMessage(String(chatId), text, { parse_mode: 'HTML', ...extra });
   } catch (e) {
@@ -55,7 +58,7 @@ async function notifyNewOrder(order) {
   const where =
     order.deliveryType === 'DELIVERY' ? `🚚 Yetkazib berish: ${esc(order.address || 'lokatsiya')}` : '🏪 Kafeda olib ketish';
   const text = `🔔 <b>Yangi buyurtma #${order.id}</b>\n\n👤 ${who}\n📞 ${esc(order.phone)}\n${where}\n💳 ${
-    order.paymentMethod === 'CASH' ? 'Naqd' : 'Terminal'
+    PAY_LABEL[order.paymentMethod]
   }\n\n${lines}${order.discount > 0 ? `\n🏷 Promo ${esc(order.promoCode)}: −${fmt(order.discount)}` : ''}${
     order.deliveryFee > 0 ? `\n🚚 Yetkazish: ${fmt(order.deliveryFee)}` : ''
   }\n\n💰 <b>${fmt(order.total)}</b>${order.comment ? `\n💬 ${esc(order.comment)}` : ''}`;
@@ -72,10 +75,27 @@ async function notifyNewOrder(order) {
   }
 }
 
+// Mijoz "to'ladim" dedi: adminlarga tekshirish uchun xabar
+async function notifyPaymentPending(order) {
+  const text = `💳 <b>To'lovni tekshiring — buyurtma #${order.id}</b>
+
+👤 ${esc(order.user.firstName)}
+💰 Summa: <b>${fmt(order.total)}</b>
+
+Payme/Click'da pul tushganini tekshirib, admin panelda tasdiqlang.`;
+  for (const id of config.adminIds) await safeSend(id, text);
+}
+
+// To'lov tasdiqlandi: mijozga xabar
+async function notifyPaymentConfirmed(order) {
+  await safeSend(order.user.telegramId, `✅ To'lovingiz tasdiqlandi!
+<b>Buyurtma #${order.id}</b> tayyorlanmoqda.`);
+}
+
 // Status o'zgarganda mijozga xabar
 async function notifyStatus(order) {
   const text = STATUS_TEXT[order.status];
   if (text) await safeSend(order.user.telegramId, `${text}\n<b>Buyurtma #${order.id}</b>`);
 }
 
-module.exports = { onStart, onHelp, notifyNewOrder, notifyStatus, fmt };
+module.exports = { onStart, onHelp, notifyNewOrder, notifyPaymentPending, notifyPaymentConfirmed, notifyStatus, fmt };

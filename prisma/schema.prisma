@@ -28,8 +28,15 @@ enum DeliveryType {
 }
 
 enum PaymentMethod {
-  CASH
-  TERMINAL
+  CASH // eski buyurtmalar uchun
+  TERMINAL // olganda terminaldan
+  ONLINE // kartaga o'tkazma (Payme/Click), qo'lda tasdiqlanadi
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING // mijoz "to'ladim" dedi, admin tekshirmoqda
+  PAID
 }
 
 model User {
@@ -71,7 +78,8 @@ model Order {
   user          User          @relation(fields: [userId], references: [id])
   status        OrderStatus   @default(NEW)
   deliveryType  DeliveryType
-  paymentMethod PaymentMethod @default(CASH)
+  paymentMethod PaymentMethod @default(TERMINAL)
+  paymentStatus PaymentStatus @default(UNPAID)
   phone         String
   address       String?
   latitude      Float?
