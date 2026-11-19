@@ -9,7 +9,7 @@ const FILTERS = [['NEW', 'Yangi'], ['PREPARING', 'Tayyorlanmoqda'], ['READY', 'T
 const ACTIONS = (o) => ({
   NEW: [['PREPARING', '👨‍🍳 Tayyorlashni boshlash'], ['CANCELLED', '❌ Bekor qilish']],
   PREPARING: [['READY', '✅ Tayyor'], ['CANCELLED', '❌ Bekor qilish']],
-  READY: [o.deliveryType === 'DELIVERY' ? ['DELIVERING', "🚚 Yo'lga chiqdi"] : ['COMPLETED', '🎉 Topshirildi'], ['CANCELLED', '❌ Bekor qilish']],
+  READY: [o.deliveryType === 'DELIVERY' ? ['DELIVERING', '🚚 Yandex kuryeriga topshirildi'] : ['COMPLETED', '🎉 Topshirildi'], ['CANCELLED', '❌ Bekor qilish']],
   DELIVERING: [['COMPLETED', '🎉 Yetkazildi'], ['CANCELLED', '❌ Bekor qilish']],
   COMPLETED: [], CANCELLED: [],
 }[o.status]);
@@ -57,7 +57,7 @@ function OrderModal({ order, onClose, onChange }) {
       <div className="mt-4 space-y-1 text-sm">
         <p>👤 {u.firstName} {u.username && <a className="underline" href={`https://t.me/${u.username}`} target="_blank" rel="noreferrer">@{u.username}</a>}</p>
         <p>📞 <a href={`tel:${order.phone}`} className="underline">{order.phone}</a></p>
-        <p>{order.deliveryType === 'DELIVERY' ? '🚚 Yetkazib berish' : '🏪 Olib ketish'} · 💳 {payLabel(order)}</p>
+        <p>{order.deliveryType === 'DELIVERY' ? '🚚 Yetkazib berish (Yandex)' : '🏪 Olib ketish'} · 💳 {payLabel(order)}</p>
         {order.address && <p>📍 {order.address}</p>}
         {order.latitude != null && <p><a className="underline" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}>🗺 Xaritada ochish</a></p>}
         {order.comment && <p>💬 {order.comment}</p>}
@@ -155,7 +155,7 @@ export default function OrdersPage({ onNew }) {
             <p className="mt-1 font-semibold">{o.user.firstName} <span className="text-sm font-normal text-muted">{o.phone}</span></p>
             <p className="mt-1 line-clamp-2 text-sm text-muted">{o.items.map((i) => `${i.name} ×${i.quantity}`).join(', ')}</p>
             <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-sm">
-              <span>{o.deliveryType === 'DELIVERY' ? '🚚 Yetkazish' : '🏪 Olib ketish'}</span>
+              <span>{o.deliveryType === 'DELIVERY' ? '🚚 Yandex' : '🏪 Olib ketish'}</span>
               {o.paymentMethod === 'ONLINE' && <span className={`badge ${PAY_STATUS[o.paymentStatus][1]}`}>{PAY_STATUS[o.paymentStatus][0]}</span>}
               <b className="text-gold">{moneySum(o.total)}</b>
             </div>

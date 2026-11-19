@@ -33,6 +33,7 @@ export default function OrderSuccess() {
               <span className="text-muted">{t('ok.total')}</span>
               <span className="font-bold">{money(order.total)} {t('sum')}</span>
             </div>
+            {order.deliveryType === 'DELIVERY' && <p className="mt-3 rounded-xl bg-surface-2 px-3 py-2 text-left text-[12px] leading-snug text-muted">🛵 {t('cart.deliveryNote')}</p>}
             {order.paymentMethod === 'ONLINE' ? (
               <div className="mt-4"><PayPanel order={order} onChange={setPlaced} /></div>
             ) : (

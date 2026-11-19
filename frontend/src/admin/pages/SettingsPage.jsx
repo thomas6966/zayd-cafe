@@ -4,8 +4,7 @@ import { api } from '../../lib/api.js';
 import { Field, Loading, PageTitle } from '../ui.jsx';
 
 const FIELDS = [
-  ['deliveryFee', "Yetkazib berish narxi (so'm)", '0 — yetkazish bepul'],
-  ['freeDeliveryFrom', "Shu summadan boshlab yetkazish bepul (so'm)", '0 — o\'chiq'],
+  ['deliveryFee', "Yetkazib berish narxi (so'm)", "Odatda 0 qoldiring: yetkazib berishni Yandex amalga oshiradi, narxini Yandex tarifi belgilaydi va mijoz kuryerga alohida to'laydi. Aniq narx kiritsangiz, u buyurtma summasiga qo'shiladi."],
   ['minOrder', "Minimal buyurtma summasi (so'm)", "0 — cheklov yo'q"],
 ];
 

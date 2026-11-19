@@ -13,7 +13,7 @@ const STATUS_TEXT = {
   NEW: '🆕 Buyurtmangiz qabul qilindi',
   PREPARING: '👨‍🍳 Buyurtmangiz tayyorlanmoqda',
   READY: '✅ Buyurtmangiz tayyor! Kafeda olib ketishingiz mumkin',
-  DELIVERING: "🚚 Buyurtmangiz yo'lda",
+  DELIVERING: "🚚 Buyurtmangiz Yandex kuryeri orqali yo'lda",
   COMPLETED: '🎉 Buyurtma yakunlandi. Yoqimli ishtaha!',
   CANCELLED: '❌ Buyurtma bekor qilindi',
 };
@@ -61,7 +61,7 @@ async function notifyNewOrder(order) {
     .join('\n');
   const who = `${esc(order.user.firstName)}${order.user.username ? ` (@${esc(order.user.username)})` : ''}`;
   const where =
-    order.deliveryType === 'DELIVERY' ? `🚚 Yetkazib berish: ${esc(order.address || 'lokatsiya')}` : '🏪 Kafeda olib ketish';
+    order.deliveryType === 'DELIVERY' ? `🚚 Yetkazib berish (Yandex): ${esc(order.address || 'lokatsiya')}` : '🏪 Kafeda olib ketish';
   const text = `🔔 <b>Yangi buyurtma #${order.id}</b>\n\n👤 ${who}\n📞 ${esc(order.phone)}\n${where}\n💳 ${
     PAY_LABEL[order.paymentMethod]
   }\n\n${lines}${order.discount > 0 ? `\n🏷 Promo ${esc(order.promoCode)}: −${fmt(order.discount)}` : ''}${

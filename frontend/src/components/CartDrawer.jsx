@@ -159,12 +159,13 @@ export default function CartDrawer() {
                 <div className="text-xl">🛍️</div><div className="mt-1">{t('cart.pickup')}</div>
               </button>
               <button className={opt(deliveryType === 'DELIVERY')} onClick={() => { haptic.select(); setDeliveryType('DELIVERY'); setError(''); }}>
-                <div className="text-xl">🛵</div><div className="mt-1">{t('cart.delivery')}</div>
+                <div className="text-xl">🛵</div><div className="mt-1">{t('cart.delivery')}</div><div className="text-[11px] font-medium opacity-70">{t('cart.deliveryYandex')}</div>
               </button>
             </div>
 
             {deliveryType === 'DELIVERY' && (
               <div className="mt-3">
+                <p className="mb-2 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[12px] leading-snug text-muted">🛵 {t('cart.deliveryNote')}</p>
                 <textarea className="field resize-none" rows={2} placeholder={t('cart.address')} value={address} onChange={(e) => setAddress(e.target.value)} />
                 <button onClick={pin} className={`mt-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold ${geo ? 'border-ok text-ok' : 'border-line text-muted'}`}>
                   📍 {geo ? t('cart.pinned') : t('cart.pin')}
@@ -199,12 +200,12 @@ export default function CartDrawer() {
             <div className="mt-5 space-y-2 rounded-2xl border border-line bg-surface-2 p-4 text-[14px]">
               <div className="flex justify-between"><span className="text-muted">{t('cart.subtotal')}</span><span className="font-semibold">{money(totals.subtotal)}</span></div>
               {totals.discount > 0 && <div className="flex justify-between"><span className="text-muted">{t('cart.discount')}</span><span className="font-semibold text-ok">−{money(totals.discount)}</span></div>}
-              {deliveryType === 'DELIVERY' && <div className="flex justify-between"><span className="text-muted">{t('cart.deliveryFee')}</span><span className={`font-semibold ${totals.deliveryFee > 0 ? '' : 'text-ok'}`}>{totals.deliveryFee > 0 ? money(totals.deliveryFee) : t('cart.free')}</span></div>}
+              {deliveryType === 'DELIVERY' && <div className="flex justify-between"><span className="text-muted">{t('cart.deliveryFee')}</span><span className="font-semibold">{totals.deliveryFee > 0 ? money(totals.deliveryFee) : t('cart.deliveryByYandex')}</span></div>}
               <div className="flex items-baseline justify-between border-t border-line pt-3">
                 <span className="text-[15px] font-bold">{t('cart.total')}</span>
                 <span className="text-[22px] font-extrabold text-gold">{money(total)} <span className="text-[12px] font-semibold text-muted">{t('sum')}</span></span>
               </div>
-              <p className="text-right text-[11.5px] text-muted">✓ {t('cart.noFees')}</p>
+              {deliveryType !== 'DELIVERY' && <p className="text-right text-[11.5px] text-muted">✓ {t('cart.noFees')}</p>}
             </div>
           </div>
 
