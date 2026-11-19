@@ -52,7 +52,8 @@ model User {
 
 model Category {
   id        Int       @id @default(autoincrement())
-  name      String
+  name      String // ruscha (asosiy)
+  nameUz    String? // o'zbekcha
   emoji     String    @default("🍽️")
   sortOrder Int       @default(0)
   isActive  Boolean   @default(true)
@@ -61,7 +62,8 @@ model Category {
 
 model Product {
   id          Int         @id @default(autoincrement())
-  name        String
+  name        String // ruscha (asosiy)
+  nameUz      String? // o'zbekcha
   description String      @default("")
   price       Int // so'mda
   imageUrl    String?

@@ -6,7 +6,7 @@ import { ErrorText, Field, FormButtons, Loading, Modal, PageTitle, Toggle, useAp
 
 function ProductForm({ product, categoryId, categories, onClose, onSaved }) {
   const [f, setF] = useState({
-    name: product?.name || '', description: product?.description || '', price: product?.price ?? '',
+    name: product?.name || '', nameUz: product?.nameUz || '', description: product?.description || '', price: product?.price ?? '',
     imageUrl: product?.imageUrl || '', categoryId: product?.categoryId || categoryId, isAvailable: product?.isAvailable ?? true,
   });
   const [err, setErr] = useState('');
@@ -31,7 +31,10 @@ function ProductForm({ product, categoryId, categories, onClose, onSaved }) {
   return (
     <Modal open onClose={onClose} title={product ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}>
       <div className="grid gap-4">
-        <Field label="Nomi"><input className="field" value={f.name} onChange={set('name')} /></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Nomi (ruscha)"><input className="field" value={f.name} onChange={set('name')} /></Field>
+          <Field label="Nomi (o'zbekcha)"><input className="field" value={f.nameUz} onChange={set('nameUz')} /></Field>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Narxi (so'm)"><input className="field" type="number" min="0" value={f.price} onChange={set('price')} /></Field>
           <Field label="Kategoriya">
@@ -58,13 +61,14 @@ function ProductForm({ product, categoryId, categories, onClose, onSaved }) {
 
 function CategoryForm({ category, onClose, onSaved }) {
   const [name, setName] = useState(category?.name || '');
+  const [nameUz, setNameUz] = useState(category?.nameUz || '');
   const [emoji, setEmoji] = useState(category?.emoji || '🍽️');
   const [err, setErr] = useState('');
   const save = async () => {
     if (!name.trim()) return setErr('Nom kerak');
     try {
-      if (category) await api.put(`/api/admin/categories/${category.id}`, { name, emoji });
-      else await api.post('/api/admin/categories', { name, emoji });
+      if (category) await api.put(`/api/admin/categories/${category.id}`, { name, nameUz, emoji });
+      else await api.post('/api/admin/categories', { name, nameUz, emoji });
       onSaved();
     } catch (e) { setErr(e.message); }
   };
@@ -76,7 +80,8 @@ function CategoryForm({ category, onClose, onSaved }) {
     <Modal open onClose={onClose} title={category ? 'Kategoriya' : 'Yangi kategoriya'}>
       <div className="grid gap-4">
         <Field label="Emoji"><input className="field" value={emoji} onChange={(e) => setEmoji(e.target.value)} /></Field>
-        <Field label="Nomi"><input className="field" value={name} onChange={(e) => setName(e.target.value)} /></Field>
+        <Field label="Nomi (ruscha)"><input className="field" value={name} onChange={(e) => setName(e.target.value)} /></Field>
+        <Field label="Nomi (o'zbekcha)"><input className="field" value={nameUz} onChange={(e) => setNameUz(e.target.value)} /></Field>
         {err && <ErrorText>{err}</ErrorText>}
         <div className="flex items-center justify-between gap-2">
           {category ? <button className="btn btn-danger" onClick={remove}>🗑 O'chirish</button> : <span />}

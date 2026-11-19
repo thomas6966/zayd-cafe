@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
 import { useT } from '../lib/i18n.js';
 import { haptic } from '../lib/tg.js';
-import { money, timeStr } from '../lib/format.js';
+import { loc, money, timeStr } from '../lib/format.js';
 import { productMap, useStore } from '../lib/store.js';
 import PayPanel from './PayPanel.jsx';
 import { Sheet } from './ui.jsx';
@@ -38,6 +38,7 @@ function Tracker({ order }) {
 }
 
 function Lines({ order, products }) {
+  const { lang } = useT();
   return (
     <div className="mt-3 flex flex-col gap-1.5">
       {order.items.map((i) => {
@@ -48,7 +49,7 @@ function Lines({ order, products }) {
               {p?.imageUrl ? <img src={p.imageUrl} alt="" className="h-full w-full object-cover" /> : '🍽️'}
             </div>
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-bold text-accent">{i.quantity}×</span> {i.name}
+              <span className="font-bold text-accent">{i.quantity}×</span> {p ? loc(p, lang) : i.name}
               {i.note && <span className="text-muted"> · {i.note}</span>}
             </span>
             <span className="text-muted">{money(i.price * i.quantity)}</span>

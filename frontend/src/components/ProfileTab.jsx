@@ -1,12 +1,12 @@
 import { useT } from '../lib/i18n.js';
 import { haptic, tgUser } from '../lib/tg.js';
-import { money } from '../lib/format.js';
+import { loc, money } from '../lib/format.js';
 import { productMap, useStore } from '../lib/store.js';
 import { LangSwitch, Avatar } from './MenuTab.jsx';
 import { Img, ThemeToggle } from './ui.jsx';
 
 export default function ProfileTab() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const u = tgUser();
   const orders = useStore((s) => s.orders);
   const menu = useStore((s) => s.menu);
@@ -60,11 +60,11 @@ export default function ProfileTab() {
                 <Img src={p.imageUrl} alt="" fallback={p.category.emoji} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14px] font-bold">{p.name}</p>
+                <p className="truncate text-[14px] font-bold">{loc(p, lang)}</p>
                 <p className="text-[13px] font-extrabold text-gold">{money(p.price)} {t('sum')}</p>
               </div>
               <button className="grid h-9 w-9 place-items-center rounded-full bg-accent text-xl font-bold text-on-accent active:scale-90"
-                onClick={() => { haptic.success(); addToCart(p.id, 1, ''); showToast(`✓ ${p.name}`); }}>+</button>
+                onClick={() => { haptic.success(); addToCart(p.id, 1, ''); showToast(`✓ ${loc(p, lang)}`); }}>+</button>
             </div>
           ))}
         </div>

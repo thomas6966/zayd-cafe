@@ -6,6 +6,7 @@ import { useStore } from '../lib/store.js';
 import ProductCard from './ProductCard.jsx';
 import ProductModal from './ProductModal.jsx';
 import { Chip, Logo, ThemeToggle } from './ui.jsx';
+import { loc } from '../lib/format.js';
 
 export function LangSwitch() {
   const lang = useStore((s) => s.lang);
@@ -47,7 +48,7 @@ export function Avatar({ size = 38 }) {
 }
 
 export default function MenuTab() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const menu = useStore((s) => s.menu);
   const favorites = useStore((s) => s.favorites);
   const addToCart = useStore((s) => s.addToCart);
@@ -70,7 +71,7 @@ export default function MenuTab() {
     const out = [];
     for (const c of menu) for (const p of c.products) {
       if (onlyFav && !favorites.includes(p.id)) continue;
-      if (needle && !`${p.name} ${p.description}`.toLowerCase().includes(needle)) continue;
+      if (needle && !`${p.name} ${p.nameUz || ''} ${p.description}`.toLowerCase().includes(needle)) continue;
       out.push({ product: p, category: c });
     }
     return out;
@@ -101,7 +102,7 @@ export default function MenuTab() {
     document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const quickAdd = (p) => { addToCart(p.id, 1, ''); haptic.success(); showToast(`✓ ${p.name}`); };
+  const quickAdd = (p) => { addToCart(p.id, 1, ''); haptic.success(); showToast(`✓ ${loc(p, lang)}`); };
   // Ichimlik va pitsa/burgerlarda sozlamalar bor — "+" oynani ochadi; souslar/fri/stripslarda to'g'ridan-to'g'ri qo'shiladi
   const SIMPLE = ['Соусы', 'Дополнительно'];
 
@@ -146,7 +147,7 @@ export default function MenuTab() {
             {menu.map((c) => (
               <button key={c.id} data-tab={c.id} onClick={() => goTo(c.id)}
                 className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold transition-colors ${active === c.id ? 'bg-cream text-bg' : 'bg-surface-2 text-muted'}`}>
-                <span>{c.emoji}</span>{c.name}
+                <span>{c.emoji}</span>{loc(c, lang)}
               </button>
             ))}
           </div>
@@ -165,7 +166,7 @@ export default function MenuTab() {
         ) : (
           menu.filter((c) => c.products.length).map((c) => (
             <section key={c.id} id={`cat-${c.id}`} data-cat={c.id} className="mb-8 scroll-mt-[210px]">
-              <h2 className="mb-3 flex items-center gap-2 font-display text-[22px] font-bold"><span>{c.emoji}</span> {c.name}</h2>
+              <h2 className="mb-3 flex items-center gap-2 font-display text-[22px] font-bold"><span>{c.emoji}</span> {loc(c, lang)}</h2>
               {grid(c.products.map((p) => ({ product: p, category: c })))}
             </section>
           ))

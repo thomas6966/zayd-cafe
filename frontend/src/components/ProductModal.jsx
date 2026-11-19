@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useT } from '../lib/i18n.js';
 import { haptic } from '../lib/tg.js';
-import { money } from '../lib/format.js';
+import { loc, money } from '../lib/format.js';
 import { useStore } from '../lib/store.js';
 import { HeartButton, Img, Sheet, Stepper } from './ui.jsx';
 
@@ -62,7 +62,7 @@ export default function ProductModal({ product, category, onClose }) {
         <>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="relative aspect-[16/11] bg-surface-2">
-              <Img src={product.imageUrl} alt={product.name} fallback={category?.emoji} className="h-full w-full object-cover" />
+              <Img src={product.imageUrl} alt={loc(product, lang)} fallback={category?.emoji} className="h-full w-full object-cover" />
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface to-transparent" />
               <div className="absolute right-3 top-3">
                 <HeartButton active={fav} onClick={() => { haptic.select(); toggleFavorite(product.id); }} />
@@ -70,8 +70,8 @@ export default function ProductModal({ product, category, onClose }) {
             </div>
 
             <div className="px-5 pb-4">
-              <p className="text-[12px] font-bold uppercase tracking-widest text-accent">{category?.emoji} {category?.name}</p>
-              <h2 className="mt-1 font-display text-[28px] font-bold leading-tight">{product.name}</h2>
+              <p className="text-[12px] font-bold uppercase tracking-widest text-accent">{category?.emoji} {loc(category, lang)}</p>
+              <h2 className="mt-1 font-display text-[28px] font-bold leading-tight">{loc(product, lang)}</h2>
               {product.description && <p className="mt-2 text-[14px] leading-relaxed text-muted">{product.description}</p>}
               <p className="mt-3 text-[22px] font-extrabold text-gold">{money(product.price)} <span className="text-[13px] font-semibold text-muted">{t('sum')}</span></p>
 

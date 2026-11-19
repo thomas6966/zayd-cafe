@@ -53,7 +53,7 @@ const setPayment = asyncH(async (req, res) => {
 const getMenu = asyncH(async (req, res) => res.json(await Product.getFullMenu()));
 
 const pick = (obj, keys) => Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
-const CAT_KEYS = ['name', 'emoji', 'sortOrder', 'isActive'];
+const CAT_KEYS = ['name', 'nameUz', 'emoji', 'sortOrder', 'isActive'];
 
 const createCategory = asyncH(async (req, res) => {
   const data = pick(req.body || {}, CAT_KEYS);
@@ -69,10 +69,11 @@ const deleteCategory = asyncH(async (req, res) => {
 });
 
 const cleanProduct = (b) => {
-  const d = pick(b || {}, ['name', 'description', 'price', 'imageUrl', 'isAvailable', 'sortOrder', 'categoryId']);
+  const d = pick(b || {}, ['name', 'nameUz', 'description', 'price', 'imageUrl', 'isAvailable', 'sortOrder', 'categoryId']);
   if (d.price !== undefined) d.price = Math.round(Number(d.price));
   if (d.categoryId !== undefined) d.categoryId = Number(d.categoryId);
   if (d.imageUrl === '') d.imageUrl = null;
+  if (d.nameUz !== undefined) d.nameUz = String(d.nameUz || '').trim() || null;
   return d;
 };
 const createProduct = asyncH(async (req, res) => {

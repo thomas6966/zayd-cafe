@@ -1,6 +1,7 @@
 // Menyuni bazaga yozish (qayta ishga tushirsa ham xavfsiz — mavjud bo'lsa o'tkazib yuboradi)
 const { PrismaClient } = require('@prisma/client');
 const images = require('./images.json'); // taom nomi -> /menu/xxx.webp
+const translations = require('./translations.json'); // ruscha nom -> o'zbekcha nom
 const prisma = new PrismaClient();
 
 const MENU = [
@@ -51,10 +52,22 @@ async function seedExtras() {
   console.log("Namuna qo'shimchalar va ZAYD10 promo-kodi yozildi.");
 }
 
+// O'zbekcha nomi yo'q kategoriya va mahsulotlarga tarjima biriktiradi
+async function applyTranslations() {
+  for (const [name, nameUz] of Object.entries(translations.categories)) {
+    await prisma.category.updateMany({ where: { name, nameUz: null }, data: { nameUz } });
+  }
+  for (const [name, nameUz] of Object.entries(translations.products)) {
+    await prisma.product.updateMany({ where: { name, nameUz: null }, data: { nameUz } });
+  }
+  console.log("O'zbekcha nomlar biriktirildi.");
+}
+
 async function main() {
   if ((await prisma.category.count()) > 0) {
     console.log('Menyu allaqachon mavjud.');
     await applyImages();
+    await applyTranslations();
     return seedExtras();
   }
   for (let i = 0; i < MENU.length; i++) {
@@ -68,6 +81,7 @@ async function main() {
   }
   console.log('Menyu muvaffaqiyatli yozildi.');
   await applyImages();
+  await applyTranslations();
   await seedExtras();
 }
 

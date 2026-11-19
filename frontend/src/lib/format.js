@@ -13,3 +13,6 @@ export const STATUS = {
 
 export const timeStr = (iso, locale = 'uz-UZ') =>
   new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+// Til bo'yicha nom: o'zbekchada nameUz (bo'lsa), aks holda ruscha asosiy nom
+export const loc = (item, lang) => (lang === 'uz' && item?.nameUz ? item.nameUz : item?.name);

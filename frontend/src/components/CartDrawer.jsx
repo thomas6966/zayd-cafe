@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
 import { useT } from '../lib/i18n.js';
 import { haptic } from '../lib/tg.js';
-import { money } from '../lib/format.js';
+import { loc, money } from '../lib/format.js';
 import { lineAddons, productMap, unitPrice, useStore } from '../lib/store.js';
 import { Img, Sheet, Stepper } from './ui.jsx';
 
@@ -13,7 +13,7 @@ function Label({ children }) {
 }
 
 export default function CartDrawer() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const open = useStore((s) => s.cartOpen);
   const setOpen = useStore((s) => s.setCartOpen);
   const menu = useStore((s) => s.menu);
@@ -138,10 +138,10 @@ export default function CartDrawer() {
                     <Img src={l.product.imageUrl} alt="" fallback={l.product.category.emoji} className="h-full w-full object-cover" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <p className="truncate text-[14px] font-bold">{l.product.name}</p>
+                    <p className="truncate text-[14px] font-bold">{loc(l.product, lang)}</p>
                     {(l.note || lineAddons(l, l.product, addons).length > 0) && (
                       <p className="line-clamp-2 text-[11.5px] leading-snug text-muted">
-                        {[...lineAddons(l, l.product, addons).map((a) => `+ ${a.name}`), l.note].filter(Boolean).join(' · ')}
+                        {[...lineAddons(l, l.product, addons).map((a) => `+ ${lang === 'ru' && a.nameRu ? a.nameRu : a.name}`), l.note].filter(Boolean).join(' · ')}
                       </p>
                     )}
                     <div className="mt-auto flex items-center justify-between pt-1.5">
