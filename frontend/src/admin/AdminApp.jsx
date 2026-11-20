@@ -22,12 +22,13 @@ const PAGES = [
 
 function Login({ onOk, denied }) {
   const [pin, setPin] = useState('');
+  const [show, setShow] = useState(false);
   const [error, setError] = useState('');
   const submit = async (e) => {
     e.preventDefault();
     adminPin.set(pin);
     try { await api.get('/api/admin/me'); onOk(); }
-    catch (err) { adminPin.clear(); setError(err.status === 403 ? "PIN noto'g'ri" : err.message); }
+    catch (err) { adminPin.clear(); setError(err.status === 403 ? "Parol noto'g'ri" : err.message); }
   };
   return (
     <div className="grid min-h-screen place-items-center p-4">
@@ -35,8 +36,13 @@ function Login({ onOk, denied }) {
       <form onSubmit={submit} className="card w-full max-w-sm p-8 text-center">
         <img src="/logo.png" className="mx-auto h-28 w-28 rounded-full" alt="" />
         <h1 className="mt-5 font-display text-3xl font-bold">Admin panel</h1>
-        <p className="mt-1 text-sm text-muted">{denied ? "Telegram ID admin ro'yxatida yo'q. PIN kiriting." : 'ZAYD Cafe'}</p>
-        <input className="field mt-6 text-center" type="password" inputMode="numeric" autoFocus placeholder="PIN kod" value={pin} onChange={(e) => setPin(e.target.value)} />
+        <p className="mt-1 text-sm text-muted">{denied ? "Telegram ID admin ro'yxatida yo'q. Parolni kiriting." : 'ZAYD Cafe'}</p>
+        <div className="relative mt-6">
+          <input className="field !pr-12 text-center" type={show ? 'text' : 'password'} inputMode="text" autoComplete="current-password"
+            autoCapitalize="none" autoCorrect="off" spellCheck={false} autoFocus placeholder="Parol" value={pin} onChange={(e) => setPin(e.target.value)} />
+          <button type="button" onClick={() => setShow(!show)} aria-label="Parolni ko'rsatish"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-lg text-muted">{show ? '🙈' : '👁'}</button>
+        </div>
         {error && <p className="mt-3 text-sm font-semibold text-bad">{error}</p>}
         <button className="btn-primary mt-4 w-full" disabled={!pin}>Kirish</button>
       </form>
